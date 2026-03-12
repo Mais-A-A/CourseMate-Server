@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start:dev": "cross-env NODE_ENV=development node dist/app.js",
-    "start:prod": "cross-env NODE_ENV=production node dist/app.js",
-    "start:test": "cross-env NODE_ENV=test node dist/app.js"
+    "start:dev": "cross-env NODE_ENV=development nodemon dist/app.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon dist/app.js",
+    "start:test": "cross-env NODE_ENV=test nodemon dist/app.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "mongoose": "^9.3.0",
+    "nodemon": "^3.1.14",
     "zod": "^4.3.6"
   },
   "devDependencies": {
