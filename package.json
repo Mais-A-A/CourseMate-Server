@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start:dev": "cross-env NODE_ENV=development node dist/app.js",
+    "start:prod": "cross-env NODE_ENV=production node dist/app.js",
+    "start:test": "cross-env NODE_ENV=test node dist/app.js"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +16,6 @@
   "type": "module",
   "dependencies": {
     "cors": "^2.8.6",
-    "cross-env": "^10.1.0",
     "custom-env": "^2.0.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
@@ -22,7 +25,9 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^25.3.1",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.4.0",
+    "cross-env": "^10.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
