@@ -3,7 +3,8 @@ import { Schema, model } from 'mongoose'
 const academicPlanSchema = new Schema(
   {
     plan_name: { type: String, required: true },
-    total_credits_required: {type: Number, required: true },
+    total_credits_required: { type: Number, required: true },
+    required_courses: [{ type: String, required: true }],
   },
   {
     timestamps: {
