@@ -1,5 +1,4 @@
 import { model, Schema } from 'mongoose'
-import { no } from 'zod/locales'
 
 const completedCourseSchema = new Schema(
   {
@@ -40,11 +39,6 @@ const studentDataSchema = new Schema(
 
 const userSchema = new Schema(
   {
-    user_id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     name: {
       type: String,
       required: true,
@@ -67,20 +61,18 @@ const userSchema = new Schema(
 
     student_data: {
       type: studentDataSchema,
+      required: function (this: any) {
+        return this.role === 'student'
+      },
       validate: {
-        validator: function (value: any) {
-          if (this.role === 'student') {
-            return value !== undefined
-          }
-          if (this.role !== 'student' && value !== undefined) {
+        validator: function (this: any, value: any) {
+          if (this.role !== 'student' && value != null) {
             return false
           }
-          return true
         },
-        message:
-          'Student data is required for users with the student role and should not be provided for non-student roles.',
+        message: 'student_data must not be provided for non-student users.',
       },
-      default: undefined,
+      default: null,
     },
   },
   {
@@ -91,4 +83,5 @@ const userSchema = new Schema(
   },
 )
 
-export const UserModel = model('User', userSchema)
+export const User = model('User', userSchema)
+export default User
