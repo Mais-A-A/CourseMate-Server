@@ -6,5 +6,5 @@ const academicRuleSchema = new Schema({
   description: { type: String, required: true },
 })
 
-const AcademicRule = model('AcademicRule', academicRuleSchema)
+export const AcademicRule = model('AcademicRule', academicRuleSchema)
 export default AcademicRule

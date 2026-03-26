@@ -8,12 +8,12 @@ export const completedCourseSchema = z.object({
 export const studentDataSchema = z.object({
   completed_courses: z.array(completedCourseSchema).optional().default([]),
   gpa: z.number().min(45.0).max(100.0).optional(),
-  warnings: z.array(z.string()).optional(),
+  academic_plan: z.string().optional(),
+  notifications: z.array(z.string()).optional(),
 })
 
 export const userSchema = z
   .object({
-    user_id: z.string(),
     name: z.string(),
     email: z.string(),
     password: z.string(),

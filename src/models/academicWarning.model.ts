@@ -23,6 +23,6 @@ const academicWarningSchema = new Schema(
   },
 )
 
-const AcademicWarning = model('AcademicWarning', academicWarningSchema)
+export const AcademicWarning = model('AcademicWarning', academicWarningSchema)
 
 export default AcademicWarning
