@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start:dev": "cross-env NODE_ENV=development nodemon dist/app.js",
-    "start:prod": "cross-env NODE_ENV=production nodemon dist/app.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon dist/index.js",
     "test": "cross-env NODE_ENV=test vitest",
     "test:watch": "cross-env NODE_ENV=test vitest --watch",
     "test:ui": "cross-env NODE_ENV=test vitest --ui",
@@ -24,12 +24,16 @@
     "helmet": "^8.1.0",
     "mongoose": "^9.3.0",
     "nodemon": "^3.1.14",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^25.5.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@vitest/coverage-v8": "^4.1.0",
     "@vitest/ui": "^4.1.0",
     "cross-env": "^10.1.0",

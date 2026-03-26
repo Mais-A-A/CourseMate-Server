@@ -100,7 +100,7 @@ describe('User Model', () => {
       password: '1234',
       role: 'admin',
     })
-    const email = user1.email
+    const email = user1.email?.toString()
     const user2: any = await userService.createUser({
       name: 'Hasan Al-Saafin',
       email: `hasan${Date.now()}@gmail.com`,
@@ -110,7 +110,7 @@ describe('User Model', () => {
 
     await expect(
       userService.updateUser(user2._id.toString(), {
-        email: email,
+        email: email!,
       }),
     ).rejects.toThrow()
   })
