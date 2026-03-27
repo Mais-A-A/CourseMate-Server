@@ -168,7 +168,7 @@ academicWarningRouter.post('/', academicWarningController.createAcademicWarning)
 /**
  * @swagger
  * /academic-warnings/{id}/resolve:
- *   post:
+ *   put:
  *     tags:
  *       - Academic Warnings
  *     summary: Resolve an academic warning
@@ -190,7 +190,7 @@ academicWarningRouter.post('/', academicWarningController.createAcademicWarning)
  *       500:
  *         description: Internal server error
  */
-academicWarningRouter.post(
+academicWarningRouter.put(
   '/:id/resolve',
   academicWarningController.resolveAcademicWarning,
 )
