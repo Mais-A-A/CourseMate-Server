@@ -1,24 +1,26 @@
 import express from 'express'
-import { connectDatabase } from './src/config/db.js'; 
-import {settings} from './src/config/settings.js'
+import { connectDatabase } from './src/config/db.js'
+import { userRouter } from './src/routers/user.routes.js'
+import { notificationRouter } from './src/routers/notification.routes.js'
+import { academicWarningRouter } from './src/routers/academicWarning.routes.js'
+import { academicRuleRouter } from './src/routers/academicRule.routes.js'
 
-const app = express();
+const app = express()
 
-app.use(express.json());
+app.use(express.json())
 
 app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
+  res.send('Server is running!')
+})
 
-connectDatabase()
-  .then(() => {
-    app.listen(settings.serverPort, () => {
-      console.log(`Server running on http://localhost:${settings.serverPort}`);
-      console.log(`Environment: ${settings.env}`);
-    });
+app.use('/user', userRouter)
+app.use('/notification', notificationRouter)
+app.use('/academic-warning', academicWarningRouter)
+app.use('/academic-rule', academicRuleRouter)
+if (process.env.NODE_ENV !== 'test') {
+  connectDatabase().catch((err) => {
+    console.error('Failed to start server:', err)
   })
-  .catch((err) => {
-    console.error('Failed to start server:', err);
-  });
+}
 
-export default app;
+export default app
