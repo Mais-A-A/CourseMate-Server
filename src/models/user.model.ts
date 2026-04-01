@@ -69,6 +69,7 @@ const userSchema = new Schema(
           if (this.role !== 'student' && value != null) {
             return false
           }
+          return true
         },
         message: 'student_data must not be provided for non-student users.',
       },

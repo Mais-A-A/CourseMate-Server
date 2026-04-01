@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start:dev": "cross-env NODE_ENV=development nodemon dist/app.js",
-    "start:prod": "cross-env NODE_ENV=production nodemon dist/app.js",
-    "test": "cross-env NODE_ENV=test vitest",
+    "start:dev": "cross-env NODE_ENV=development nodemon dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon dist/index.js",
+    "seed": "cross-env NODE_ENV=test node  dist/src/seed.js",
+    "test:unit": "cross-env NODE_ENV=test USE_REAL=false vitest",
+    "test:integration": "cross-env NODE_ENV=test USE_REAL=true vitest",
     "test:watch": "cross-env NODE_ENV=test vitest --watch",
-    "test:ui": "cross-env NODE_ENV=test vitest --ui",
+    "test:ui": "cross-env NODE_ENV=test  vitest --ui",
     "coverage": "cross-env NODE_ENV=test vitest run --coverage"
   },
   "keywords": [],
