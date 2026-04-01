@@ -19,18 +19,19 @@ export function isUniversityEmail(email: string): boolean {
 }
 
 export function detectRole(email: string): UserRole {
-  const localPart = email.trim().toLocaleLowerCase().split('@')[0]
-  switch (localPart) {
-    case 'jabary980':
-      return 'admin'
-    case UNIVERSITY_DOMAIN1:
-    case UNIVERSITY_DOMAIN2:
-      return /^\d+$/.test(localPart!) ? 'student' : 'supervisor'
+  const localPart = email.trim().toLocaleLowerCase().split('@')[0]!
 
-    default:
-      return 'supervisor'
+  if (isUniversityEmail(email)) {
+    if (localPart == 'jabary980') {
+      return 'admin'
+    } else if (/^\d+$/.test(localPart!)) {
+      return 'student'
+    }
+    return 'supervisor'
   }
+  process.exit(1)
 }
+
 export function extractStudentId(email: string): string | null {
   const role = detectRole(email)
   if (role !== 'student') return null

@@ -15,6 +15,7 @@ const envSchema = z.object({
   GOOGLE_CALLBACK_URL: z.string(),
   JWT_SECRET: z.string(),
   CLIENT_URL: z.string(),
+  USE_REAL: z.string().optional(),
 })
 
 const parsedEnv = envSchema.parse(process.env)
