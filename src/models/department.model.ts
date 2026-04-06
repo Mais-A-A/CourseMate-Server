@@ -14,5 +14,4 @@ const departmentSchema = new Schema(
 )
 
 const Department = model('Department', departmentSchema)
-
 export default Department

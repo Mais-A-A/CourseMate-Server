@@ -22,6 +22,6 @@ const courseSchema = new Schema(
   },
 )
 
-const Course = model('Course', courseSchema)
+export const Course = model('Course', courseSchema)
 
 export default Course
