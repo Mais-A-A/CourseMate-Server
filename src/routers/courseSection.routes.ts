@@ -50,6 +50,15 @@ const courseSectionRouter = Router()
  *     tags:
  *       - Course Sections
  *     summary: Get all course sections
+ *     responses:
+ *       200:
+ *         description: List of all course sections
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CourseSection'
  */
 courseSectionRouter.get('/', courseSectionController.getCourseSections)
 
@@ -59,7 +68,22 @@ courseSectionRouter.get('/', courseSectionController.getCourseSections)
  *   get:
  *     tags:
  *       - Course Sections
- *     summary: Get course section by ID
+ *     summary: Get a course section by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Course section found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CourseSection'
+ *       404:
+ *         description: Course section not found
  */
 courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
 
@@ -70,6 +94,21 @@ courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
  *     tags:
  *       - Course Sections
  *     summary: Create a new course section
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CourseSection'
+ *     responses:
+ *       201:
+ *         description: Course section created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CourseSection'
+ *       400:
+ *         description: Validation error
  */
 courseSectionRouter.post('/', courseSectionController.createCourseSection)
 
@@ -79,7 +118,28 @@ courseSectionRouter.post('/', courseSectionController.createCourseSection)
  *   put:
  *     tags:
  *       - Course Sections
- *     summary: Update a course section
+ *     summary: Update a course section by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CourseSection'
+ *     responses:
+ *       200:
+ *         description: Course section updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CourseSection'
+ *       404:
+ *         description: Course section not found
  */
 courseSectionRouter.put('/:id', courseSectionController.updateCourseSection)
 
@@ -89,7 +149,18 @@ courseSectionRouter.put('/:id', courseSectionController.updateCourseSection)
  *   delete:
  *     tags:
  *       - Course Sections
- *     summary: Delete a course section
+ *     summary: Delete a course section by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Course section deleted successfully
+ *       404:
+ *         description: Course section not found
  */
 courseSectionRouter.delete('/:id', courseSectionController.deleteCourseSection)
 

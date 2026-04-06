@@ -33,6 +33,15 @@ const aiRecomendationRouter = Router()
  *     tags:
  *       - AI Recommendations
  *     summary: Get all AI recommendations
+ *     responses:
+ *       200:
+ *         description: List of all AI recommendations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AIRecomendation'
  */
 aiRecomendationRouter.get('/', aiRecomendationController.getAIRecomendations)
 
@@ -43,6 +52,21 @@ aiRecomendationRouter.get('/', aiRecomendationController.getAIRecomendations)
  *     tags:
  *       - AI Recommendations
  *     summary: Get AI recommendation by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: AI recommendation found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AIRecomendation'
+ *       404:
+ *         description: AI recommendation not found
  */
 aiRecomendationRouter.get('/:id', aiRecomendationController.getAIRecomendationById)
 
@@ -53,6 +77,21 @@ aiRecomendationRouter.get('/:id', aiRecomendationController.getAIRecomendationBy
  *     tags:
  *       - AI Recommendations
  *     summary: Create AI recommendation
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AIRecomendation'
+ *     responses:
+ *       201:
+ *         description: AI recommendation created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AIRecomendation'
+ *       400:
+ *         description: Validation error
  */
 aiRecomendationRouter.post('/', aiRecomendationController.createAIRecomendation)
 
@@ -62,7 +101,28 @@ aiRecomendationRouter.post('/', aiRecomendationController.createAIRecomendation)
  *   put:
  *     tags:
  *       - AI Recommendations
- *     summary: Update AI recommendation
+ *     summary: Update AI recommendation by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AIRecomendation'
+ *     responses:
+ *       200:
+ *         description: AI recommendation updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AIRecomendation'
+ *       404:
+ *         description: AI recommendation not found
  */
 aiRecomendationRouter.put('/:id', aiRecomendationController.updateAIRecomendation)
 
@@ -72,7 +132,18 @@ aiRecomendationRouter.put('/:id', aiRecomendationController.updateAIRecomendatio
  *   delete:
  *     tags:
  *       - AI Recommendations
- *     summary: Delete AI recommendation
+ *     summary: Delete AI recommendation by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: AI recommendation deleted successfully
+ *       404:
+ *         description: AI recommendation not found
  */
 aiRecomendationRouter.delete('/:id', aiRecomendationController.deleteAIRecomendation)
 

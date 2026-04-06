@@ -26,6 +26,15 @@ const departmentRouter = Router()
  *     tags:
  *       - Departments
  *     summary: Get all departments
+ *     responses:
+ *       200:
+ *         description: List of all departments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Department'
  */
 departmentRouter.get('/', departmentController.getDepartments)
 
@@ -35,7 +44,22 @@ departmentRouter.get('/', departmentController.getDepartments)
  *   get:
  *     tags:
  *       - Departments
- *     summary: Get department by ID
+ *     summary: Get a department by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Department found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Department'
+ *       404:
+ *         description: Department not found
  */
 departmentRouter.get('/:id', departmentController.getDepartmentById)
 
@@ -46,6 +70,21 @@ departmentRouter.get('/:id', departmentController.getDepartmentById)
  *     tags:
  *       - Departments
  *     summary: Create a new department
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Department'
+ *     responses:
+ *       201:
+ *         description: Department created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Department'
+ *       400:
+ *         description: Validation error
  */
 departmentRouter.post('/', departmentController.createDepartment)
 
@@ -55,7 +94,28 @@ departmentRouter.post('/', departmentController.createDepartment)
  *   put:
  *     tags:
  *       - Departments
- *     summary: Update a department
+ *     summary: Update a department by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Department'
+ *     responses:
+ *       200:
+ *         description: Department updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Department'
+ *       404:
+ *         description: Department not found
  */
 departmentRouter.put('/:id', departmentController.updateDepartment)
 
@@ -65,7 +125,18 @@ departmentRouter.put('/:id', departmentController.updateDepartment)
  *   delete:
  *     tags:
  *       - Departments
- *     summary: Delete a department
+ *     summary: Delete a department by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Department deleted successfully
+ *       404:
+ *         description: Department not found
  */
 departmentRouter.delete('/:id', departmentController.deleteDepartment)
 

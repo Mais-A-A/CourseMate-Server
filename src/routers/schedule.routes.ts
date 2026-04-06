@@ -35,6 +35,15 @@ const scheduleRouter = Router()
  *     tags:
  *       - Schedules
  *     summary: Get all schedules
+ *     responses:
+ *       200:
+ *         description: List of all schedules
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Schedule'
  */
 scheduleRouter.get('/', scheduleController.getSchedules)
 
@@ -44,7 +53,22 @@ scheduleRouter.get('/', scheduleController.getSchedules)
  *   get:
  *     tags:
  *       - Schedules
- *     summary: Get schedule by ID
+ *     summary: Get a schedule by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Schedule found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       404:
+ *         description: Schedule not found
  */
 scheduleRouter.get('/:id', scheduleController.getScheduleById)
 
@@ -55,6 +79,21 @@ scheduleRouter.get('/:id', scheduleController.getScheduleById)
  *     tags:
  *       - Schedules
  *     summary: Create a new schedule
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Schedule'
+ *     responses:
+ *       201:
+ *         description: Schedule created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       400:
+ *         description: Validation error
  */
 scheduleRouter.post('/', scheduleController.createSchedule)
 
@@ -64,7 +103,28 @@ scheduleRouter.post('/', scheduleController.createSchedule)
  *   put:
  *     tags:
  *       - Schedules
- *     summary: Update a schedule
+ *     summary: Update a schedule by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Schedule'
+ *     responses:
+ *       200:
+ *         description: Schedule updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       404:
+ *         description: Schedule not found
  */
 scheduleRouter.put('/:id', scheduleController.updateSchedule)
 
@@ -74,7 +134,18 @@ scheduleRouter.put('/:id', scheduleController.updateSchedule)
  *   delete:
  *     tags:
  *       - Schedules
- *     summary: Delete a schedule
+ *     summary: Delete a schedule by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Schedule deleted successfully
+ *       404:
+ *         description: Schedule not found
  */
 scheduleRouter.delete('/:id', scheduleController.deleteSchedule)
 

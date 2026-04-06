@@ -40,6 +40,15 @@ const courseRouter = Router()
  *     tags:
  *       - Courses
  *     summary: Get all courses
+ *     responses:
+ *       200:
+ *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
  */
 courseRouter.get('/', courseController.getCourses)
 
@@ -49,7 +58,22 @@ courseRouter.get('/', courseController.getCourses)
  *   get:
  *     tags:
  *       - Courses
- *     summary: Get course by ID
+ *     summary: Get a course by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Course found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Course not found
  */
 courseRouter.get('/:id', courseController.getCourseById)
 
@@ -60,6 +84,21 @@ courseRouter.get('/:id', courseController.getCourseById)
  *     tags:
  *       - Courses
  *     summary: Create a new course
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Course'
+ *     responses:
+ *       201:
+ *         description: Course created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       400:
+ *         description: Validation error
  */
 courseRouter.post('/', courseController.createCourse)
 
@@ -69,7 +108,28 @@ courseRouter.post('/', courseController.createCourse)
  *   put:
  *     tags:
  *       - Courses
- *     summary: Update a course
+ *     summary: Update a course by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Course'
+ *     responses:
+ *       200:
+ *         description: Course updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Course not found
  */
 courseRouter.put('/:id', courseController.updateCourse)
 
@@ -79,7 +139,18 @@ courseRouter.put('/:id', courseController.updateCourse)
  *   delete:
  *     tags:
  *       - Courses
- *     summary: Delete a course
+ *     summary: Delete a course by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Course deleted successfully
+ *       404:
+ *         description: Course not found
  */
 courseRouter.delete('/:id', courseController.deleteCourse)
 
