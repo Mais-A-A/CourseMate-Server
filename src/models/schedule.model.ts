@@ -22,6 +22,6 @@ const scheduleSchema = new Schema(
   },
 )
 
-const Schedule = model('Schedule', scheduleSchema)
+export const Schedule = model('Schedule', scheduleSchema)
 
 export default Schedule
