@@ -1,0 +1,69 @@
+import { describe, it, expect, beforeEach } from 'vitest'
+import mongoose from 'mongoose'
+import { scheduleService } from '../src/services/schedule.service.js'
+import { Schedule } from '../src/models/schedule.model.js'
+
+describe('Schedule Service', () => {
+
+  beforeEach(async () => {
+    await Schedule.deleteMany()
+  })
+
+  const mockSchedule = {
+    student_id: new mongoose.Types.ObjectId().toString(),
+    semester_id: '2025-FALL',
+    course_sections: [
+      {
+        course_section_id: [new mongoose.Types.ObjectId()]
+      }
+    ]
+  }
+
+  it('should create schedule', async () => {
+    const result = await scheduleService.createSchedule(mockSchedule)
+
+    expect(result).toBeDefined()
+    expect(result._id).toBeDefined()
+    expect(result.semester_id).toBe('2025-FALL')
+  })
+
+  it('should get all schedules', async () => {
+    await scheduleService.createSchedule(mockSchedule)
+
+    const schedules = await scheduleService.getAllSchedules()
+
+    expect(schedules.length).toBe(1)
+  })
+
+  it('should get schedule by id', async () => {
+    const created: any = await scheduleService.createSchedule(mockSchedule)
+
+    const found = await scheduleService.getScheduleById(created._id.toString())
+
+    expect(found).toBeDefined()
+    expect(found?.semester_id).toBe('2025-FALL')
+  })
+
+  it('should update schedule', async () => {
+    const created: any = await scheduleService.createSchedule(mockSchedule)
+
+    const updated = await scheduleService.updateSchedule(
+      created._id.toString(),
+      { semester_id: '2026-SPRING' }
+    )
+
+    expect(updated).toBeDefined()
+    expect(updated?.semester_id).toBe('2026-SPRING')
+  })
+
+  it('should delete schedule', async () => {
+    const created: any = await scheduleService.createSchedule(mockSchedule)
+
+    await scheduleService.deleteSchedule(created._id.toString())
+
+    const found = await scheduleService.getScheduleById(created._id.toString())
+
+    expect(found).toBeNull()
+  })
+
+})
