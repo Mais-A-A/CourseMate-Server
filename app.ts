@@ -4,12 +4,12 @@ import { userRouter } from './src/routers/user.routes.js'
 import { notificationRouter } from './src/routers/notification.routes.js'
 import { academicWarningRouter } from './src/routers/academicWarning.routes.js'
 import { academicRuleRouter } from './src/routers/academicRule.routes.js'
-import { academicPlanRouter } from './src/routers/academicPlan.routes.js'
-import { aiRecomendationRouter } from './src/routers/AIRecomendation.routes.js'
-import { courseRouter } from './src/routers/course.routes.js'
-import { courseSectionRouter } from './src/routers/courseSection.routes.js'
-import { departmentRouter } from './src/routers/department.routes.js'
-import { scheduleRouter } from './src/routers/schedule.routes.js'
+import { academicPlanRouter } from './src/routes/academicPlan.routes.js'
+import { aiRecomendationRouter } from './src/routes/AIRecomendation.routes.js'
+import { courseRouter } from './src/routes/course.routes.js'
+import { courseSectionRouter } from './src/routes/courseSection.routes.js'
+import { departmentRouter } from './src/routes/department.routes.js'
+import { scheduleRouter } from './src/routes/schedule.routes.js'
 
 const app = express()
 
