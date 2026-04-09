@@ -26,6 +26,6 @@ const courseSectionSchema = new Schema(
   },
 )
 
-const CourseSection = model('CourseSection', courseSectionSchema)
+export const CourseSection = model('CourseSection', courseSectionSchema)
 
 export default CourseSection
