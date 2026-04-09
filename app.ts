@@ -14,6 +14,13 @@ import { scheduleRouter } from './src/routers/schedule.routes.js'
 const app = express()
 
 app.use(express.json())
+app.use(cookieParser())
+app.use(passport.initialize())
+app.use('/api/auth', authRouter)
+app.use('/academic-rule', academicRuleRouter)
+app.use('/academic-warning', academicWarningRouter)
+app.use('/notification', notificationRouter)
+app.use('/user', userRouter)
 
 app.get('/', (req, res) => {
   res.send('Server is running!')
