@@ -2,21 +2,20 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import mongoose from 'mongoose'
 import { scheduleService } from '../src/services/schedule.service.js'
 import { Schedule } from '../src/models/schedule.model.js'
+import type { Schedule as ScheduleType } from '../src/schemas/schedule.schema.js'
 
 describe('Schedule Service', () => {
-
   beforeEach(async () => {
     await Schedule.deleteMany()
   })
 
-  const mockSchedule = {
+  const mockSchedule: ScheduleType = {
     student_id: new mongoose.Types.ObjectId().toString(),
-    semester_id: '2025-FALL',
-    course_sections: [
-      {
-        course_section_id: [new mongoose.Types.ObjectId()]
-      }
-    ]
+    studentNo: 1001,
+    academicYear: 2025,
+    academicYearTitle: '2025/2026',
+    semesterNo: 1,
+    semesterTitle: 'Fall',
   }
 
   it('should create schedule', async () => {
@@ -24,7 +23,7 @@ describe('Schedule Service', () => {
 
     expect(result).toBeDefined()
     expect(result._id).toBeDefined()
-    expect(result.semester_id).toBe('2025-FALL')
+    expect(result.semesterNo).toBe(1)
   })
 
   it('should get all schedules', async () => {
@@ -41,7 +40,7 @@ describe('Schedule Service', () => {
     const found = await scheduleService.getScheduleById(created._id.toString())
 
     expect(found).toBeDefined()
-    expect(found?.semester_id).toBe('2025-FALL')
+    expect(found?.semesterNo).toBe(1)
   })
 
   it('should update schedule', async () => {
@@ -49,11 +48,11 @@ describe('Schedule Service', () => {
 
     const updated = await scheduleService.updateSchedule(
       created._id.toString(),
-      { semester_id: '2026-SPRING' }
+      { semesterTitle: 'Spring' },
     )
 
     expect(updated).toBeDefined()
-    expect(updated?.semester_id).toBe('2026-SPRING')
+    expect(updated?.semesterTitle).toBe('Spring')
   })
 
   it('should delete schedule', async () => {
@@ -65,5 +64,4 @@ describe('Schedule Service', () => {
 
     expect(found).toBeNull()
   })
-
 })

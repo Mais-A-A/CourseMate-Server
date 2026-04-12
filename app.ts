@@ -1,16 +1,19 @@
 import express from 'express'
 import { connectDatabase } from './src/config/db.js'
-import { userRouter } from './src/routers/user.routes.js'
-import { notificationRouter } from './src/routers/notification.routes.js'
-import { academicWarningRouter } from './src/routers/academicWarning.routes.js'
-import { academicRuleRouter } from './src/routers/academicRule.routes.js'
+import cookieParser from 'cookie-parser'
+import passport from './src/config/passport.js'
+import authRouter from './src/routes/auth.route.js'
+import { userRouter } from './src/routes/user.routes.js'
+import { notificationRouter } from './src/routes/notification.routes.js'
+import { academicWarningRouter } from './src/routes/academicWarning.routes.js'
+import { academicRuleRouter } from './src/routes/academicRule.routes.js'
 import { academicPlanRouter } from './src/routes/academicPlan.routes.js'
 import { aiRecomendationRouter } from './src/routes/AIRecomendation.routes.js'
 import { courseRouter } from './src/routes/course.routes.js'
 import { courseSectionRouter } from './src/routes/courseSection.routes.js'
 import { departmentRouter } from './src/routes/department.routes.js'
 import { scheduleRouter } from './src/routes/schedule.routes.js'
-
+import aiRoutes from './src/routes/ai.route.js'
 const app = express()
 
 app.use(express.json())
@@ -21,8 +24,13 @@ app.use('/academic-rule', academicRuleRouter)
 app.use('/academic-warning', academicWarningRouter)
 app.use('/notification', notificationRouter)
 app.use('/user', userRouter)
+app.use(
+  '/ai',
 
-app.get('/', (req, res) => {
+  aiRoutes,
+)
+
+app.get('/health', (req, res) => {
   res.send('Server is running!')
 })
 

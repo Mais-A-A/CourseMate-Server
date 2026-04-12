@@ -2,21 +2,25 @@ import { Schema, model } from 'mongoose'
 
 const courseSectionSchema = new Schema(
   {
-    course_id: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    semester_id: { type: String, required: true },
-    instructor: { type: String, required: true }, // #TO-DO: Discuss --> this needs to be an id, we need an instructor collection
-    class_days: [
-      {
-        type: String,
-        enum: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu'],
-        required: true,
-      },
-    ],
-    start_time: { type: String, required: true }, // with format "HH:mm"
-    end_time: { type: String, required: true }, // with format "HH:mm"
-    classroom: { type: String, required: true },
-    capacity: { type: Number, required: true },
-    available_seats: { type: Number, required: true },
+    acdYear: { type: Number, required: true },
+    semesterNo: { type: Number, required: true },
+    courseNo: { type: Number, required: true },
+    courseName: { type: String, required: true },
+    courseCredietHrs: { type: Number, required: true },
+    sectionNo: { type: Number, required: true },
+    labSectionNo: { type: Number, default: -1 },
+    roomName: { type: String },
+    buildingName: { type: String },
+    supervisorName: { type: String },
+    capacity: { type: Number },
+    counter: { type: Number, default: 0 },
+    majorNo: { type: Number },
+    isOpen: { type: Boolean, default: true },
+    packageCaption: { type: String },
+    secTime: { type: String },
+    collageArabicName: { type: String },
+    majorArabicName: { type: String },
+    lSectionNo: { type: String, default: '' },
   },
   {
     timestamps: {

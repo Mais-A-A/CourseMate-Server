@@ -9,16 +9,14 @@ if (env.USE_REAL !== 'true') {
     it('should create a new academic warning', async () => {
       const warningData: AcademicWarning = {
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       }
       const warning =
         await academicWarningService.createAcademicWarning(warningData)
       expect(warning).toHaveProperty('_id')
-      expect(warning.warning_type).toBe(warningData.warning_type)
-      expect(warning.message).toBe(warningData.message)
-      expect(warning.is_resolved).toBe(warningData.is_resolved)
+      expect(warning.caption).toBe(warningData.caption)
+      expect(warning.value).toBe(warningData.value)
     })
 
     it('should retrieve all academic warnings', async () => {
@@ -35,9 +33,8 @@ if (env.USE_REAL !== 'true') {
     it('should retrieve an academic warning by ID', async () => {
       const warningData: AcademicWarning = {
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       }
 
       const createdWarning: any =
@@ -54,14 +51,13 @@ if (env.USE_REAL !== 'true') {
     it('should update an academic warning', async () => {
       const warningData: AcademicWarning = {
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       }
       const createdWarning: any =
         await academicWarningService.createAcademicWarning(warningData)
       const updatedData: Partial<AcademicWarning> = {
-        message: 'Student has a GPA below 1.5',
+        value: 'Student has a GPA below 1.5',
       }
       const updatedWarning: any =
         await academicWarningService.updateAcademicWarning(
@@ -69,14 +65,13 @@ if (env.USE_REAL !== 'true') {
           updatedData,
         )
       expect(updatedWarning).toBeTruthy()
-      expect(updatedWarning!.message).toBe(updatedData.message)
+      expect(updatedWarning!.value).toBe(updatedData.value)
     })
     it('should resolve an academic warning', async () => {
       const warningData: AcademicWarning = {
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       }
       const createdWarning: any =
         await academicWarningService.createAcademicWarning(warningData)
@@ -85,15 +80,15 @@ if (env.USE_REAL !== 'true') {
           createdWarning!._id.toString(),
         )
       expect(resolvedWarning).toBeTruthy()
-      expect(resolvedWarning!.is_resolved).toBe(true)
-      expect(resolvedWarning!.resolved_at).toBeTruthy()
+      expect(resolvedWarning!._id.toString()).toBe(
+        createdWarning!._id.toString(),
+      )
     })
     it('should delete an academic warning', async () => {
       const warningData: AcademicWarning = {
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       }
       const createdWarning: any =
         await academicWarningService.createAcademicWarning(warningData)
@@ -112,12 +107,11 @@ if (env.USE_REAL !== 'true') {
     it('should create a new academic warning', async () => {
       const res = await request(app).post('/academic-warning').send({
         user_id: '69b819c1376ba34dbc403585',
-        warning_type: 'Low GPA',
-        message: 'Student has a GPA below 2.0',
-        is_resolved: false,
+        caption: 'Low GPA',
+        value: 'Student has a GPA below 2.0',
       })
       expect(res.status).toBe(201)
-      expect(res.body.message).toBe('Student has a GPA below 2.0')
+      expect(res.body.value).toBe('Student has a GPA below 2.0')
     })
     it('should get academic warnings for a user', async () => {
       const res = await request(app).get(
@@ -135,7 +129,7 @@ if (env.USE_REAL !== 'true') {
         `/academic-warning/${warningId}/resolve`,
       )
       expect(res.status).toBe(200)
-      expect(res.body.is_resolved).toBe(true)
+      expect(res.body._id).toBe(warningId)
     })
     it('should delete an academic warning', async () => {
       const warningsRes = await request(app).get(

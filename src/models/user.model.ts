@@ -2,15 +2,30 @@ import { model, Schema } from 'mongoose'
 
 const completedCourseSchema = new Schema(
   {
-    course_id: { type: String, required: true },
-    course_name: { type: String, required: true },
+    courseNo: { type: Number, required: true },
+    courseArabicName: { type: String },
+    academicYear: { type: Number },
+    semesterNo: { type: Number },
+    creditHours: { type: String },
     grade: { type: String, required: true },
+    weight: { type: String, default: '' },
+    caption: { type: String, default: '' },
+  },
+  { _id: false },
+)
+
+const supervisorSchema = new Schema(
+  {
+    supervisorNo: { type: Number },
+    supervisorArabicName: { type: String },
+    supervisorEmail: { type: String },
   },
   { _id: false },
 )
 
 const studentDataSchema = new Schema(
   {
+    studentNo: { type: Number },
     completed_courses: {
       type: [completedCourseSchema],
       default: [],
@@ -21,12 +36,12 @@ const studentDataSchema = new Schema(
       min: 45.0,
       max: 100.0,
     },
-    /* I assumeed that the academic plan is a reference to an AcademicPlan document that defines the student's academic requirements and I also assumed that each student has only one academic plan, which is why it's a single reference rather than an array which may look diffrent form the Database design but it is more practical for the use case*/
     academic_plan: {
       type: Schema.Types.ObjectId,
       ref: 'AcademicPlan',
       required: true,
     },
+    supervisor: supervisorSchema,
     notifications: [
       {
         type: Schema.Types.ObjectId,

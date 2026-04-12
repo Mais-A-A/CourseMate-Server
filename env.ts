@@ -16,6 +16,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   CLIENT_URL: z.string(),
   USE_REAL: z.string().optional(),
+  GEMINI_API_KEY: z.string(),
 })
 
 const parsedEnv = envSchema.parse(process.env)

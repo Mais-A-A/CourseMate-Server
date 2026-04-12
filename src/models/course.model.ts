@@ -2,17 +2,15 @@ import { Schema, model } from 'mongoose'
 
 const courseSchema = new Schema(
   {
-    course_code: { type: String, required: true },
-    title: { type: String, required: true },
-    credits: { type: Number, required: true },
-    department_id: {type: Schema.Types.ObjectId, ref: 'Department', required: true },
-    diffeculty_level: {
-        type: String,
-        enum: ["low", "moderate", "high"] // this needs more work(maybe numbers not enum), 
-                                          // #TO-DO: Discuss that with Hasan
-    }, 
-    plan_id: {type: Schema.Types.ObjectId, ref: 'AcademicPlan', required: true },
-    estimated: {type: Number, required: true}
+    courseNo: { type: Number, required: true },
+    coursesArabicName: { type: String, required: true },
+    coursesCreditHours: { type: Number, required: true },
+    courseLevel: { type: Number },
+    courseOrder: { type: Number },
+    courseSemester: { type: Number, default: null },
+    courseYear: { type: Number, default: null },
+    preCourse: [{ type: Number }],
+    department_id: { type: Schema.Types.ObjectId, ref: 'Department' },
   },
   {
     timestamps: {

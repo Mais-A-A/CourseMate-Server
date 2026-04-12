@@ -5,26 +5,24 @@ import env from '../env.js'
 import request from 'supertest'
 import app from '../app.js'
 
-const level: Course['diffeculty_level'] = 'moderate'
-
 if (env.USE_REAL !== 'true') {
   describe('CourseService', () => {
     it('should create a new course', async () => {
       const courseData: Course = {
-        course_code: 'CS101',
-        title: 'Intro to CS',
-        credits: 3,
+        courseNo: 101,
+        coursesArabicName: 'Intro to CS',
+        coursesCreditHours: 3,
+        preCourse: [],
         department_id: '64a5c1b1f1a2b3c4d5e6f789',
-        diffeculty_level: level,
-        plan_id: '64a5c1b1f1a2b3c4d5e6f788',
-        estimated: 120,
+        courseLevel: 1,
+        courseOrder: 1,
       }
 
       const course = await courseService.createCourse(courseData)
 
       expect(course).toHaveProperty('_id')
-      expect(course.title).toBe(courseData.title)
-      expect(course.course_code).toBe(courseData.course_code)
+      expect(course.coursesArabicName).toBe(courseData.coursesArabicName)
+      expect(course.courseNo).toBe(courseData.courseNo)
     })
 
     it('should retrieve all courses', async () => {
@@ -34,13 +32,12 @@ if (env.USE_REAL !== 'true') {
 
     it('should retrieve a course by ID', async () => {
       const courseData: Course = {
-        course_code: 'CS102',
-        title: 'Data Structures',
-        credits: 3,
+        courseNo: 102,
+        coursesArabicName: 'Data Structures',
+        coursesCreditHours: 3,
+        preCourse: [],
         department_id: '64a5c1b1f1a2b3c4d5e6f789',
-        diffeculty_level: level,
-        plan_id: '64a5c1b1f1a2b3c4d5e6f788',
-        estimated: 100,
+        courseLevel: 2,
       }
 
       const created: any = await courseService.createCourse(courseData)
@@ -55,35 +52,33 @@ if (env.USE_REAL !== 'true') {
 
     it('should update a course', async () => {
       const courseData: Course = {
-        course_code: 'CS103',
-        title: 'Algorithms',
-        credits: 3,
+        courseNo: 103,
+        coursesArabicName: 'Algorithms',
+        coursesCreditHours: 3,
+        preCourse: [],
         department_id: '64a5c1b1f1a2b3c4d5e6f789',
-        diffeculty_level: level,
-        plan_id: '64a5c1b1f1a2b3c4d5e6f788',
-        estimated: 90,
+        courseLevel: 2,
       }
 
       const created: any = await courseService.createCourse(courseData)
 
       const updated: any = await courseService.updateCourse(
         created._id.toString(),
-        { title: 'Advanced Algorithms' },
+        { coursesArabicName: 'Advanced Algorithms' },
       )
 
       expect(updated).toBeTruthy()
-      expect(updated!.title).toBe('Advanced Algorithms')
+      expect(updated!.coursesArabicName).toBe('Advanced Algorithms')
     })
 
     it('should delete a course', async () => {
       const courseData: Course = {
-        course_code: 'CS104',
-        title: 'Databases',
-        credits: 3,
+        courseNo: 104,
+        coursesArabicName: 'Databases',
+        coursesCreditHours: 3,
+        preCourse: [],
         department_id: '64a5c1b1f1a2b3c4d5e6f789',
-        diffeculty_level: level,
-        plan_id: '64a5c1b1f1a2b3c4d5e6f788',
-        estimated: 110,
+        courseLevel: 2,
       }
 
       const created: any = await courseService.createCourse(courseData)
@@ -100,17 +95,16 @@ if (env.USE_REAL !== 'true') {
   describe('Course Integration tests', () => {
     it('should create a new course', async () => {
       const res = await request(app).post('/courses').send({
-        course_code: 'CS101',
-        title: 'Intro to CS',
-        credits: 3,
+        courseNo: 101,
+        coursesArabicName: 'Intro to CS',
+        coursesCreditHours: 3,
+        preCourse: [],
         department_id: '64a5c1b1f1a2b3c4d5e6f789',
-        diffeculty_level: level,
-        plan_id: '64a5c1b1f1a2b3c4d5e6f788',
-        estimated: 120,
+        courseLevel: 1,
       })
 
       expect(res.status).toBe(201)
-      expect(res.body.title).toBe('Intro to CS')
+      expect(res.body.coursesArabicName).toBe('Intro to CS')
     })
 
     it('should get all courses', async () => {
@@ -125,10 +119,10 @@ if (env.USE_REAL !== 'true') {
 
       const res = await request(app)
         .put(`/courses/${courseId}`)
-        .send({ title: 'Updated Course' })
+        .send({ coursesArabicName: 'Updated Course' })
 
       expect(res.status).toBe(200)
-      expect(res.body.title).toBe('Updated Course')
+      expect(res.body.coursesArabicName).toBe('Updated Course')
     })
 
     it('should delete a course', async () => {
