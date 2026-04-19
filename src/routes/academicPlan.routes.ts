@@ -1,6 +1,12 @@
 import { academicPlanController } from '../controllers/academicPlan.controller.js'
 import { Router } from 'express'
-
+import { AcademicPlanSchema } from '../schemas/academicPlan.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import {
+  requireAuth,
+  requireRole,
+  requireAuthorizeUserOrHigher,
+} from '../middlewares/auth.middleware.js'
 const academicPlanRouter = Router()
 
 /**
@@ -26,7 +32,7 @@ const academicPlanRouter = Router()
 
 /**
  * @swagger
- * /academic-plans:
+ * /academic-plan:
  *   get:
  *     tags:
  *       - Academic Plans
@@ -40,14 +46,23 @@ const academicPlanRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AcademicPlan'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-academicPlanRouter.get('/', academicPlanController.getAcademicPlans)
+academicPlanRouter.get(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  academicPlanController.getAcademicPlans,
+)
 
 /**
  * @swagger
- * /academic-plans/{id}:
+ * /academic-plan/{id}:
  *   get:
  *     tags:
  *       - Academic Plans
@@ -65,16 +80,25 @@ academicPlanRouter.get('/', academicPlanController.getAcademicPlans)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicPlan'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic plan not found
  *       500:
  *         description: Internal server error
  */
-academicPlanRouter.get('/:id', academicPlanController.getAcademicPlanById)
+academicPlanRouter.get(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicPlanController.getAcademicPlanById,
+)
 
 /**
  * @swagger
- * /academic-plans:
+ * /academic-plan:
  *   post:
  *     tags:
  *       - Academic Plans
@@ -94,14 +118,24 @@ academicPlanRouter.get('/:id', academicPlanController.getAcademicPlanById)
  *               $ref: '#/components/schemas/AcademicPlan'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-academicPlanRouter.post('/', academicPlanController.createAcademicPlan)
+academicPlanRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(AcademicPlanSchema),
+  academicPlanController.createAcademicPlan,
+)
 
 /**
  * @swagger
- * /academic-plans/{id}:
+ * /academic-plan/{id}:
  *   put:
  *     tags:
  *       - Academic Plans
@@ -125,16 +159,28 @@ academicPlanRouter.post('/', academicPlanController.createAcademicPlan)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicPlan'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic plan not found
  *       500:
  *         description: Internal server error
  */
-academicPlanRouter.put('/:id', academicPlanController.updateAcademicPlan)
+academicPlanRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(AcademicPlanSchema),
+  academicPlanController.updateAcademicPlan,
+)
 
 /**
  * @swagger
- * /academic-plans/{id}:
+ * /academic-plan/{id}:
  *   delete:
  *     tags:
  *       - Academic Plans
@@ -148,12 +194,21 @@ academicPlanRouter.put('/:id', academicPlanController.updateAcademicPlan)
  *     responses:
  *       200:
  *         description: Academic plan deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic plan not found
  *       500:
  *         description: Internal server error
  */
-academicPlanRouter.delete('/:id', academicPlanController.deleteAcademicPlan)
+academicPlanRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicPlanController.deleteAcademicPlan,
+)
 
 export { academicPlanRouter }
 export default academicPlanRouter

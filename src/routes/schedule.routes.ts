@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { scheduleController } from '../controllers/schedule.controller.js'
-
+import { ScheduleSchema } from '../schemas/schedule.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const scheduleRouter = Router()
 
 /**
@@ -30,7 +32,7 @@ const scheduleRouter = Router()
 
 /**
  * @swagger
- * /schedules:
+ * /schedule:
  *   get:
  *     tags:
  *       - Schedules
@@ -44,12 +46,14 @@ const scheduleRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Schedule'
+ *       401:
+ *         description: Unauthorized
  */
-scheduleRouter.get('/', scheduleController.getSchedules)
+scheduleRouter.get('/', requireAuth, scheduleController.getSchedules)
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /schedule/{id}:
  *   get:
  *     tags:
  *       - Schedules
@@ -67,14 +71,16 @@ scheduleRouter.get('/', scheduleController.getSchedules)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Schedule'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.get('/:id', scheduleController.getScheduleById)
+scheduleRouter.get('/:id', requireAuth, scheduleController.getScheduleById)
 
 /**
  * @swagger
- * /schedules:
+ * /schedule:
  *   post:
  *     tags:
  *       - Schedules
@@ -94,12 +100,19 @@ scheduleRouter.get('/:id', scheduleController.getScheduleById)
  *               $ref: '#/components/schemas/Schedule'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  */
-scheduleRouter.post('/', scheduleController.createSchedule)
+scheduleRouter.post(
+  '/',
+  requireAuth,
+  validateRequest(ScheduleSchema),
+  scheduleController.createSchedule,
+)
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /schedule/{id}:
  *   put:
  *     tags:
  *       - Schedules
@@ -123,14 +136,23 @@ scheduleRouter.post('/', scheduleController.createSchedule)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Schedule'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.put('/:id', scheduleController.updateSchedule)
+scheduleRouter.put(
+  '/:id',
+  requireAuth,
+  validateRequest(ScheduleSchema),
+  scheduleController.updateSchedule,
+)
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /schedule/{id}:
  *   delete:
  *     tags:
  *       - Schedules
@@ -144,10 +166,12 @@ scheduleRouter.put('/:id', scheduleController.updateSchedule)
  *     responses:
  *       200:
  *         description: Schedule deleted successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.delete('/:id', scheduleController.deleteSchedule)
+scheduleRouter.delete('/:id', requireAuth, scheduleController.deleteSchedule)
 
 export { scheduleRouter }
 export default scheduleRouter

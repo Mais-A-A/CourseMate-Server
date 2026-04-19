@@ -1,5 +1,8 @@
 import { Router } from 'express'
 import { aiRecomendationController } from '../controllers/AIRecomendation.controller.js'
+import { AIRecomendationSchema } from '../schemas/AIRecomendation.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 
 const aiRecomendationRouter = Router()
 
@@ -28,7 +31,7 @@ const aiRecomendationRouter = Router()
 
 /**
  * @swagger
- * /ai-recommendations:
+ * /ai-recomendation:
  *   get:
  *     tags:
  *       - AI Recommendations
@@ -42,12 +45,21 @@ const aiRecomendationRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AIRecomendation'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
-aiRecomendationRouter.get('/', aiRecomendationController.getAIRecomendations)
+aiRecomendationRouter.get(
+  '/',
+  requireAuth,
+  requireRole('admin', 'supervisor'),
+  aiRecomendationController.getAIRecomendations,
+)
 
 /**
  * @swagger
- * /ai-recommendations/{id}:
+ * /ai-recomendation/{id}:
  *   get:
  *     tags:
  *       - AI Recommendations
@@ -65,14 +77,23 @@ aiRecomendationRouter.get('/', aiRecomendationController.getAIRecomendations)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AIRecomendation'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: AI recommendation not found
  */
-aiRecomendationRouter.get('/:id', aiRecomendationController.getAIRecomendationById)
+aiRecomendationRouter.get(
+  '/:id',
+  requireAuth,
+  requireRole('admin', 'supervisor'),
+  aiRecomendationController.getAIRecomendationById,
+)
 
 /**
  * @swagger
- * /ai-recommendations:
+ * /ai-recomendation:
  *   post:
  *     tags:
  *       - AI Recommendations
@@ -92,12 +113,19 @@ aiRecomendationRouter.get('/:id', aiRecomendationController.getAIRecomendationBy
  *               $ref: '#/components/schemas/AIRecomendation'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  */
-aiRecomendationRouter.post('/', aiRecomendationController.createAIRecomendation)
+aiRecomendationRouter.post(
+  '/',
+  requireAuth,
+  validateRequest(AIRecomendationSchema),
+  aiRecomendationController.createAIRecomendation,
+)
 
 /**
  * @swagger
- * /ai-recommendations/{id}:
+ * /ai-recomendation/{id}:
  *   put:
  *     tags:
  *       - AI Recommendations
@@ -121,14 +149,26 @@ aiRecomendationRouter.post('/', aiRecomendationController.createAIRecomendation)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AIRecomendation'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: AI recommendation not found
  */
-aiRecomendationRouter.put('/:id', aiRecomendationController.updateAIRecomendation)
+aiRecomendationRouter.put(
+  '/:id',
+  requireAuth,
+  validateRequest(AIRecomendationSchema),
+  requireRole('admin'),
+  aiRecomendationController.updateAIRecomendation,
+)
 
 /**
  * @swagger
- * /ai-recommendations/{id}:
+ * /ai-recomendation/{id}:
  *   delete:
  *     tags:
  *       - AI Recommendations
@@ -142,10 +182,19 @@ aiRecomendationRouter.put('/:id', aiRecomendationController.updateAIRecomendatio
  *     responses:
  *       200:
  *         description: AI recommendation deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: AI recommendation not found
  */
-aiRecomendationRouter.delete('/:id', aiRecomendationController.deleteAIRecomendation)
+aiRecomendationRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  aiRecomendationController.deleteAIRecomendation,
+)
 
 export { aiRecomendationRouter }
 export default aiRecomendationRouter

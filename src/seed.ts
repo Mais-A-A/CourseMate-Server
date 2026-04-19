@@ -810,7 +810,6 @@ export const seed = async () => {
     },
   ])
 
-  // ─── Users ─────────────────────────────────────────────────────────────────
   const supervisor = await UserModel.create({
     name: 'Mohammad Jawad Al-Jabari',
     email: 'jabary980@ppu.edu',

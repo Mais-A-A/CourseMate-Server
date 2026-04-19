@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { courseSectionController } from '../controllers/courseSection.controller.js'
-
+import { CourseSectionSchema } from '../schemas/courseSection.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const courseSectionRouter = Router()
 
 /**
@@ -45,7 +47,7 @@ const courseSectionRouter = Router()
 
 /**
  * @swagger
- * /course-sections:
+ * /course-section:
  *   get:
  *     tags:
  *       - Course Sections
@@ -64,7 +66,7 @@ courseSectionRouter.get('/', courseSectionController.getCourseSections)
 
 /**
  * @swagger
- * /course-sections/{id}:
+ * /course-section/{id}:
  *   get:
  *     tags:
  *       - Course Sections
@@ -89,7 +91,7 @@ courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
 
 /**
  * @swagger
- * /course-sections:
+ * /course-section:
  *   post:
  *     tags:
  *       - Course Sections
@@ -109,12 +111,22 @@ courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
  *               $ref: '#/components/schemas/CourseSection'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
-courseSectionRouter.post('/', courseSectionController.createCourseSection)
+courseSectionRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(CourseSectionSchema),
+  courseSectionController.createCourseSection,
+)
 
 /**
  * @swagger
- * /course-sections/{id}:
+ * /course-section/{id}:
  *   put:
  *     tags:
  *       - Course Sections
@@ -138,14 +150,26 @@ courseSectionRouter.post('/', courseSectionController.createCourseSection)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/CourseSection'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Course section not found
  */
-courseSectionRouter.put('/:id', courseSectionController.updateCourseSection)
+courseSectionRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(CourseSectionSchema),
+  courseSectionController.updateCourseSection,
+)
 
 /**
  * @swagger
- * /course-sections/{id}:
+ * /course-section/{id}:
  *   delete:
  *     tags:
  *       - Course Sections
@@ -159,10 +183,19 @@ courseSectionRouter.put('/:id', courseSectionController.updateCourseSection)
  *     responses:
  *       200:
  *         description: Course section deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Course section not found
  */
-courseSectionRouter.delete('/:id', courseSectionController.deleteCourseSection)
+courseSectionRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  courseSectionController.deleteCourseSection,
+)
 
 export { courseSectionRouter }
 export default courseSectionRouter

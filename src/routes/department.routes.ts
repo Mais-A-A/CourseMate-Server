@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { departmentController } from '../controllers/department.controller.js'
-
+import { DepartmentSchema } from '../schemas/department.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const departmentRouter = Router()
 
 /**
@@ -21,7 +23,7 @@ const departmentRouter = Router()
 
 /**
  * @swagger
- * /departments:
+ * /department:
  *   get:
  *     tags:
  *       - Departments
@@ -40,7 +42,7 @@ departmentRouter.get('/', departmentController.getDepartments)
 
 /**
  * @swagger
- * /departments/{id}:
+ * /department/{id}:
  *   get:
  *     tags:
  *       - Departments
@@ -65,7 +67,7 @@ departmentRouter.get('/:id', departmentController.getDepartmentById)
 
 /**
  * @swagger
- * /departments:
+ * /department:
  *   post:
  *     tags:
  *       - Departments
@@ -85,12 +87,22 @@ departmentRouter.get('/:id', departmentController.getDepartmentById)
  *               $ref: '#/components/schemas/Department'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
-departmentRouter.post('/', departmentController.createDepartment)
+departmentRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(DepartmentSchema),
+  departmentController.createDepartment,
+)
 
 /**
  * @swagger
- * /departments/{id}:
+ * /department/{id}:
  *   put:
  *     tags:
  *       - Departments
@@ -114,14 +126,26 @@ departmentRouter.post('/', departmentController.createDepartment)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Department'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Department not found
  */
-departmentRouter.put('/:id', departmentController.updateDepartment)
+departmentRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(DepartmentSchema),
+  departmentController.updateDepartment,
+)
 
 /**
  * @swagger
- * /departments/{id}:
+ * /department/{id}:
  *   delete:
  *     tags:
  *       - Departments
@@ -135,10 +159,19 @@ departmentRouter.put('/:id', departmentController.updateDepartment)
  *     responses:
  *       200:
  *         description: Department deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Department not found
  */
-departmentRouter.delete('/:id', departmentController.deleteDepartment)
+departmentRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  departmentController.deleteDepartment,
+)
 
 export { departmentRouter }
 export default departmentRouter

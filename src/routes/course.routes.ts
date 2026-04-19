@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { courseController } from '../controllers/course.controller.js'
-
+import { CourseSchema } from '../schemas/course.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const courseRouter = Router()
 
 /**
@@ -35,7 +37,7 @@ const courseRouter = Router()
 
 /**
  * @swagger
- * /courses:
+ * /course:
  *   get:
  *     tags:
  *       - Courses
@@ -54,7 +56,7 @@ courseRouter.get('/', courseController.getCourses)
 
 /**
  * @swagger
- * /courses/{id}:
+ * /course/{id}:
  *   get:
  *     tags:
  *       - Courses
@@ -79,7 +81,7 @@ courseRouter.get('/:id', courseController.getCourseById)
 
 /**
  * @swagger
- * /courses:
+ * /course:
  *   post:
  *     tags:
  *       - Courses
@@ -99,12 +101,22 @@ courseRouter.get('/:id', courseController.getCourseById)
  *               $ref: '#/components/schemas/Course'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
-courseRouter.post('/', courseController.createCourse)
+courseRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(CourseSchema),
+  courseController.createCourse,
+)
 
 /**
  * @swagger
- * /courses/{id}:
+ * /course/{id}:
  *   put:
  *     tags:
  *       - Courses
@@ -128,14 +140,26 @@ courseRouter.post('/', courseController.createCourse)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Course'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Course not found
  */
-courseRouter.put('/:id', courseController.updateCourse)
+courseRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(CourseSchema),
+  courseController.updateCourse,
+)
 
 /**
  * @swagger
- * /courses/{id}:
+ * /course/{id}:
  *   delete:
  *     tags:
  *       - Courses
@@ -149,10 +173,19 @@ courseRouter.put('/:id', courseController.updateCourse)
  *     responses:
  *       200:
  *         description: Course deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Course not found
  */
-courseRouter.delete('/:id', courseController.deleteCourse)
+courseRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  courseController.deleteCourse,
+)
 
 export { courseRouter }
 export default courseRouter

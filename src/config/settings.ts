@@ -10,8 +10,7 @@ if (!mongoUsername || !mongoPassword || !mongoCluster || !mongoDatabaseName) {
   throw new Error('Missing MongoDB environment variables')
 }
 
-//const mongoURL = `mongodb+srv://${mongoUsername}:${mongoPassword}@${mongoCluster}/${mongoDatabaseName}?retryWrites=true&w=majority`
-const mongoURL = 'localhost:27017/coursemate'
+const mongoURL = `mongodb+srv://${mongoUsername}:${mongoPassword}@${mongoCluster}/${mongoDatabaseName}?retryWrites=true&w=majority`
 // #TO-DO: handle different envs --> almost done
 export const settings = {
   env: env.NODE_ENV,

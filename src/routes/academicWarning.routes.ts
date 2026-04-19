@@ -1,6 +1,12 @@
 import { academicWarningController } from '../controllers/academicWarning.controller.js'
 import { Router } from 'express'
-
+import { academicWarningSchema } from '../schemas/academicWarning.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import {
+  requireAuth,
+  requireRole,
+  requireAuthorizeUserOrHigher,
+} from '../middlewares/auth.middleware.js'
 const academicWarningRouter = Router()
 
 /**
@@ -27,7 +33,7 @@ const academicWarningRouter = Router()
 
 /**
  * @swagger
- * /academic-warnings:
+ * /academic-warning:
  *   get:
  *     tags:
  *       - Academic Warnings
@@ -41,14 +47,23 @@ const academicWarningRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AcademicWarning'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-academicWarningRouter.get('/', academicWarningController.getAcademicWarnings)
+academicWarningRouter.get(
+  '/',
+  requireAuth,
+  requireRole('admin', 'supervisor'),
+  academicWarningController.getAcademicWarnings,
+)
 
 /**
  * @swagger
- * /academic-warnings/warningType/{warningType}:
+ * /academic-warning/warningType/{warningType}:
  *   get:
  *     tags:
  *       - Academic Warnings
@@ -68,17 +83,23 @@ academicWarningRouter.get('/', academicWarningController.getAcademicWarnings)
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AcademicWarning'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
 academicWarningRouter.get(
   '/warningType/:warningType',
+  requireAuth,
+  requireRole('admin', 'supervisor'),
   academicWarningController.getAcademicWarningsByWarningType,
 )
 
 /**
  * @swagger
- * /academic-warnings/user/{userId}:
+ * /academic-warning/user/{userId}:
  *   get:
  *     tags:
  *       - Academic Warnings
@@ -98,6 +119,10 @@ academicWarningRouter.get(
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AcademicWarning'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: User not found
  *       500:
@@ -105,12 +130,14 @@ academicWarningRouter.get(
  */
 academicWarningRouter.get(
   '/user/:userId',
+  requireAuth,
+  requireAuthorizeUserOrHigher,
   academicWarningController.getAcademicWarningsByUserId,
 )
 
 /**
  * @swagger
- * /academic-warnings/{id}:
+ * /academic-warning/{id}:
  *   get:
  *     tags:
  *       - Academic Warnings
@@ -128,6 +155,8 @@ academicWarningRouter.get(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicWarning'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Academic warning not found
  *       500:
@@ -135,12 +164,13 @@ academicWarningRouter.get(
  */
 academicWarningRouter.get(
   '/:id',
+  requireAuth,
   academicWarningController.getAcademicWarningById,
 )
 
 /**
  * @swagger
- * /academic-warnings:
+ * /academic-warning:
  *   post:
  *     tags:
  *       - Academic Warnings
@@ -160,14 +190,24 @@ academicWarningRouter.get(
  *               $ref: '#/components/schemas/AcademicWarning'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-academicWarningRouter.post('/', academicWarningController.createAcademicWarning)
+academicWarningRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(academicWarningSchema),
+  academicWarningController.createAcademicWarning,
+)
 
 /**
  * @swagger
- * /academic-warnings/{id}/resolve:
+ * /academic-warning/{id}/resolve:
  *   put:
  *     tags:
  *       - Academic Warnings
@@ -185,6 +225,12 @@ academicWarningRouter.post('/', academicWarningController.createAcademicWarning)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicWarning'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic warning not found
  *       500:
@@ -192,12 +238,15 @@ academicWarningRouter.post('/', academicWarningController.createAcademicWarning)
  */
 academicWarningRouter.put(
   '/:id/resolve',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(academicWarningSchema),
   academicWarningController.resolveAcademicWarning,
 )
 
 /**
  * @swagger
- * /academic-warnings/{id}:
+ * /academic-warning/{id}:
  *   put:
  *     tags:
  *       - Academic Warnings
@@ -221,6 +270,12 @@ academicWarningRouter.put(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicWarning'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic warning not found
  *       500:
@@ -228,12 +283,15 @@ academicWarningRouter.put(
  */
 academicWarningRouter.put(
   '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(academicWarningSchema),
   academicWarningController.updateAcademicWarning,
 )
 
 /**
  * @swagger
- * /academic-warnings/{id}:
+ * /academic-warning/{id}:
  *   delete:
  *     tags:
  *       - Academic Warnings
@@ -247,6 +305,10 @@ academicWarningRouter.put(
  *     responses:
  *       200:
  *         description: Academic warning deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic warning not found
  *       500:
@@ -254,6 +316,9 @@ academicWarningRouter.put(
  */
 academicWarningRouter.delete(
   '/:id',
+  requireAuth,
+  requireRole('admin'),
+
   academicWarningController.deleteAcademicWarning,
 )
 

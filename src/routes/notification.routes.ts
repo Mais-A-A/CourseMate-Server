@@ -1,5 +1,8 @@
 import { notificationController } from '../controllers/notification.controller.js'
 import { Router } from 'express'
+import { notificationSchema } from '../schemas/notification.schemas.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const notificationRouter = Router()
 
 /**
@@ -28,7 +31,7 @@ const notificationRouter = Router()
 
 /**
  * @swagger
- * /notifications/user/{userId}:
+ * /notification/user/{userId}:
  *   get:
  *     tags:
  *       - Notifications
@@ -48,6 +51,8 @@ const notificationRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Notification'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  *       500:
@@ -55,12 +60,13 @@ const notificationRouter = Router()
  */
 notificationRouter.get(
   '/user/:userId',
+  requireAuth,
   notificationController.getNotificationsByUserId,
 )
 
 /**
  * @swagger
- * /notifications/user/{userId}/read:
+ * /notification/user/{userId}/read:
  *   put:
  *     tags:
  *       - Notifications
@@ -74,6 +80,8 @@ notificationRouter.get(
  *     responses:
  *       200:
  *         description: All notifications marked as read
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  *       500:
@@ -81,12 +89,14 @@ notificationRouter.get(
  */
 notificationRouter.put(
   '/user/:userId/read',
+  requireAuth,
+
   notificationController.markAllAsRead,
 )
 
 /**
  * @swagger
- * /notifications/{notificationId}:
+ * /notification/{notificationId}:
  *   get:
  *     tags:
  *       - Notifications
@@ -104,6 +114,8 @@ notificationRouter.put(
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Notification'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Notification not found
  *       500:
@@ -111,12 +123,13 @@ notificationRouter.put(
  */
 notificationRouter.get(
   '/:notificationId',
+  requireAuth,
   notificationController.getNotificationById,
 )
 
 /**
  * @swagger
- * /notifications:
+ * /notification:
  *   post:
  *     tags:
  *       - Notifications
@@ -136,14 +149,21 @@ notificationRouter.get(
  *               $ref: '#/components/schemas/Notification'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
-notificationRouter.post('/', notificationController.createNotification)
+notificationRouter.post(
+  '/',
+  requireAuth,
+  validateRequest(notificationSchema),
+  notificationController.createNotification,
+)
 
 /**
  * @swagger
- * /notifications/{notificationId}/read:
+ * /notification/{notificationId}/read:
  *   put:
  *     tags:
  *       - Notifications
@@ -161,6 +181,8 @@ notificationRouter.post('/', notificationController.createNotification)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Notification'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Notification not found
  *       500:
@@ -168,12 +190,13 @@ notificationRouter.post('/', notificationController.createNotification)
  */
 notificationRouter.put(
   '/:notificationId/read',
+  requireAuth,
   notificationController.markAsRead,
 )
 
 /**
  * @swagger
- * /notifications/{notificationId}:
+ * /notification/{notificationId}:
  *   delete:
  *     tags:
  *       - Notifications
@@ -187,6 +210,8 @@ notificationRouter.put(
  *     responses:
  *       200:
  *         description: Notification deleted successfully
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Notification not found
  *       500:
@@ -194,6 +219,8 @@ notificationRouter.put(
  */
 notificationRouter.delete(
   '/:notificationId',
+  requireAuth,
+
   notificationController.deleteNotification,
 )
 

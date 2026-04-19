@@ -1,5 +1,8 @@
 import { userController } from '../controllers/user.controller.js'
 import { Router } from 'express'
+import { userSchema } from '../schemas/user.schemas.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const userRouter = Router()
 
 /**
@@ -63,7 +66,7 @@ const userRouter = Router()
 
 /**
  * @swagger
- * /users:
+ * /user:
  *   get:
  *     tags:
  *       - Users
@@ -77,14 +80,16 @@ const userRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/', userController.getAllUsers)
+userRouter.get('/', requireAuth, userController.getAllUsers)
 
 /**
  * @swagger
- * /users/search:
+ * /user/search:
  *   get:
  *     tags:
  *       - Users
@@ -105,16 +110,18 @@ userRouter.get('/', userController.getAllUsers)
  *               $ref: '#/components/schemas/User'
  *       400:
  *         description: Email is required
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/search', userController.getUserByEmail)
+userRouter.get('/search', requireAuth, userController.getUserByEmail)
 
 /**
  * @swagger
- * /users/{id}:
+ * /user/{id}:
  *   get:
  *     tags:
  *       - Users
@@ -132,16 +139,18 @@ userRouter.get('/search', userController.getUserByEmail)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/:id', userController.getUserById)
+userRouter.get('/:id', requireAuth, userController.getUserById)
 
 /**
  * @swagger
- * /users:
+ * /user:
  *   post:
  *     tags:
  *       - Users
@@ -161,14 +170,24 @@ userRouter.get('/:id', userController.getUserById)
  *               $ref: '#/components/schemas/User'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-userRouter.post('/', userController.createUser)
+userRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(userSchema),
+  userController.createUser,
+)
 
 /**
  * @swagger
- * /users/{id}:
+ * /user/{id}:
  *   put:
  *     tags:
  *       - Users
@@ -192,16 +211,28 @@ userRouter.post('/', userController.createUser)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: User not found
  *       500:
  *         description: Internal server error
  */
-userRouter.put('/:id', userController.updateUser)
+userRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(userSchema),
+  userController.updateUser,
+)
 
 /**
  * @swagger
- * /users/{id}:
+ * /user/{id}:
  *   delete:
  *     tags:
  *       - Users
@@ -215,12 +246,21 @@ userRouter.put('/:id', userController.updateUser)
  *     responses:
  *       200:
  *         description: User deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: User not found
  *       500:
  *         description: Internal server error
  */
-userRouter.delete('/:id', userController.deleteUser)
+userRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  userController.deleteUser,
+)
 
 export { userRouter }
 export default userRouter
