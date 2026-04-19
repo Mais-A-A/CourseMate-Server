@@ -3,70 +3,105 @@ import { describe, it, expect } from 'vitest'
 import request from 'supertest'
 import app from '../app.js'
 import env from '../env.js'
+import type { AcademicPlan } from '../src/schemas/academicPlan.schema.js'
 
 if (env.USE_REAL !== 'true') {
   describe('AcademicPlanService', () => {
     it('should create a new academic plan', async () => {
-      const planData = {
-        plan_name: 'CS22',
-        total_credits_required: 120,
-        required_courses: ['CS101', 'CS102', 'CS103'],
+      const planData: AcademicPlan = {
+        majorNo: 22,
+        planYear: 2022,
+        groups: [
+          {
+            groupNo: 1,
+            groupEnglishName: 'Core',
+            groupCoursList: [
+              {
+                courseNo: 101,
+                preCourse: [],
+                courseGrades: ['A'],
+              },
+            ],
+          },
+        ],
       }
       const plan = await academicPlanService.createAcademicPlan(planData)
       expect(plan).toHaveProperty('_id')
-      expect(plan.plan_name).toBe(planData.plan_name)
-      expect(plan.total_credits_required).toBe(planData.total_credits_required)
-      expect(plan.required_courses).toEqual(planData.required_courses)
+      expect(plan.majorNo).toBe(planData.majorNo)
+      expect(plan.planYear).toBe(planData.planYear)
+      expect(plan.groups).toHaveLength(1)
     })
 
     it('should retrieve all academic plans', async () => {
-      const plans = await academicPlanService.getAllAcademicPlans() 
+      const plans = await academicPlanService.getAllAcademicPlans()
       expect(Array.isArray(plans)).toBe(true)
     })
 
     it('should retrieve an academic plan by ID', async () => {
-      const planData = {
-        plan_name: 'CE24',
-        total_credits_required: 100,
-        required_courses: ['CE101', 'CE103'],
+      const planData: AcademicPlan = {
+        majorNo: 24,
+        planYear: 2024,
+        groups: [
+          {
+            groupNo: 2,
+            groupEnglishName: 'Electives',
+            groupCoursList: [
+              {
+                courseNo: 201,
+                preCourse: [],
+                courseGrades: ['B'],
+              },
+            ],
+          },
+        ],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
       const retrievedPlan = await academicPlanService.getAcademicPlanById(
-        createdPlan.id.toString()
+        createdPlan.id.toString(),
       )
       expect(retrievedPlan).toBeTruthy()
       expect(retrievedPlan?._id.toString()).toBe(createdPlan.id.toString())
     })
 
     it('should update an academic plan', async () => {
-      const planData = {
-        plan_name: 'PHY25',
-        total_credits_required: 110,
-        required_courses: ['PHY101', 'PHY102'],
+      const planData: AcademicPlan = {
+        majorNo: 25,
+        planYear: 2025,
+        groups: [
+          {
+            groupNo: 3,
+            groupEnglishName: 'Physics Core',
+            groupCoursList: [
+              {
+                courseNo: 301,
+                preCourse: [],
+                courseGrades: ['A', 'B'],
+              },
+            ],
+          },
+        ],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
-      const updatedData = {
-        total_credits_required: 115,
-        required_courses: ['PHY101', 'PHY102', 'PHY103'],
+      const updatedData: Partial<AcademicPlan> = {
+        planYear: 2026,
       }
       const updatedPlan = await academicPlanService.updateAcademicPlan(
         createdPlan.id.toString(),
-        updatedData
+        updatedData,
       )
       expect(updatedPlan).toBeTruthy()
-      expect(updatedPlan?.total_credits_required).toBe(updatedData.total_credits_required)
-      expect(updatedPlan?.required_courses).toEqual(updatedData.required_courses)
+      expect(updatedPlan?.planYear).toBe(updatedData.planYear)
     })
 
     it('should delete an academic plan', async () => {
-      const planData = {
-        plan_name: 'CHEM21',
-        total_credits_required: 90,
-        required_courses: ['CHEM101', 'CHEM102'],
+      const planData: AcademicPlan = {
+        majorNo: 21,
+        planYear: 2021,
+        groups: [],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
       const deletedPlan = await academicPlanService.deleteAcademicPlan(
-        createdPlan.id.toString()
+        createdPlan.id.toString(),
       )
       expect(deletedPlan).toBeTruthy()
       expect(deletedPlan?.id.toString()).toBe(createdPlan.id.toString())
@@ -76,65 +111,64 @@ if (env.USE_REAL !== 'true') {
   describe('AcademicPlan Integration tests', () => {
     it('should create a new academic plan', async () => {
       const planData = {
-        plan_name: 'CS22',
-        total_credits_required: 120,
-        required_courses: ['CS101', 'CS102', 'CS103'],
+        majorNo: 22,
+        planYear: 2022,
+        groups: [],
       }
-      const res = await request(app).post('/academic-plans').send(planData)
+      const res = await request(app).post('/academic-plan').send(planData)
       expect(res.status).toBe(201)
       expect(res.body).toHaveProperty('_id')
-      expect(res.body.plan_name).toBe(planData.plan_name)
-      expect(res.body.total_credits_required).toBe(planData.total_credits_required)
-      expect(res.body.required_courses).toEqual(planData.required_courses)
+      expect(res.body.majorNo).toBe(planData.majorNo)
+      expect(res.body.planYear).toBe(planData.planYear)
     })
 
     it('should get all academic plans', async () => {
-      const res = await request(app).get('/academic-plans')
+      const res = await request(app).get('/academic-plan')
       expect(res.status).toBe(200)
       expect(Array.isArray(res.body)).toBe(true)
     })
 
     it('should get an academic plan by ID', async () => {
       const planData = {
-        plan_name: 'CE24',
-        total_credits_required: 100,
-        required_courses: ['CE101', 'CE103'],
+        majorNo: 24,
+        planYear: 2024,
+        groups: [],
       }
-      const createRes = await request(app).post('/academic-plans').send(planData)
+      const createRes = await request(app).post('/academic-plan').send(planData)
       const planId = createRes.body._id
-      const res = await request(app).get(`/academic-plans/${planId}`)
+      const res = await request(app).get(`/academic-plan/${planId}`)
       expect(res.status).toBe(200)
       expect(res.body._id).toBe(planId)
     })
 
     it('should update an academic plan', async () => {
       const planData = {
-        plan_name: 'PHY25',
-        total_credits_required: 110,
-        required_courses: ['PHY101', 'PHY102'],
+        majorNo: 25,
+        planYear: 2025,
+        groups: [],
       }
-      const createRes = await request(app).post('/academic-plans').send(planData)
+      const createRes = await request(app).post('/academic-plan').send(planData)
       const planId = createRes.body._id
       const updatedData = {
-        total_credits_required: 115,
-        required_courses: ['PHY101', 'PHY102', 'PHY103'],
+        planYear: 2026,
       }
-      const res = await request(app).put(`/academic-plans/${planId}`).send(updatedData)
+      const res = await request(app)
+        .put(`/academic-plan/${planId}`)
+        .send(updatedData)
       expect(res.status).toBe(200)
-      expect(res.body.total_credits_required).toBe(updatedData.total_credits_required)
-      expect(res.body.required_courses).toEqual(updatedData.required_courses)
+      expect(res.body.planYear).toBe(updatedData.planYear)
     })
 
     it('should delete an academic plan', async () => {
       const planData = {
-        plan_name: 'CHEM21',
-        total_credits_required: 90,
-        required_courses: ['CHEM101', 'CHEM102'],
+        majorNo: 21,
+        planYear: 2021,
+        groups: [],
       }
-      const createRes = await request(app).post('/academic-plans').send(planData)
+      const createRes = await request(app).post('/academic-plan').send(planData)
       const planId = createRes.body._id
-      const res = await request(app).delete(`/academic-plans/${planId}`)
+      const res = await request(app).delete(`/academic-plan/${planId}`)
       expect(res.status).toBe(200)
     })
   })
-}``
+}

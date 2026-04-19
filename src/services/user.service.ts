@@ -13,7 +13,7 @@ class UserService {
   }
 
   async getAllUsers() {
-    return await User.find().lean()
+    return await User.find().lean().select('-password')
   }
 
   async getUserByEmail(email: string) {

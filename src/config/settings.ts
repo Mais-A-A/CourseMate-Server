@@ -11,7 +11,6 @@ if (!mongoUsername || !mongoPassword || !mongoCluster || !mongoDatabaseName) {
 }
 
 const mongoURL = `mongodb+srv://${mongoUsername}:${mongoPassword}@${mongoCluster}/${mongoDatabaseName}?retryWrites=true&w=majority`
-
 // #TO-DO: handle different envs --> almost done
 export const settings = {
   env: env.NODE_ENV,

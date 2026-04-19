@@ -1,6 +1,8 @@
 import { academicRuleController } from '../controllers/academicRule.controller.js'
 import { Router } from 'express'
-
+import { academicRuleSchema } from '../schemas/academicRule.schema.js'
+import { validateRequest } from '../middlewares/validation.js'
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 const academicRuleRouter = Router()
 
 /**
@@ -21,7 +23,7 @@ const academicRuleRouter = Router()
 
 /**
  * @swagger
- * /academic-rules:
+ * /academic-rule:
  *   get:
  *     tags:
  *       - Academic Rules
@@ -35,14 +37,20 @@ const academicRuleRouter = Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AcademicRule'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
-academicRuleRouter.get('/', academicRuleController.getAcademicRules)
+academicRuleRouter.get(
+  '/',
+  requireAuth,
+  academicRuleController.getAcademicRules,
+)
 
 /**
  * @swagger
- * /academic-rules/{id}:
+ * /academic-rule/{id}:
  *   get:
  *     tags:
  *       - Academic Rules
@@ -60,16 +68,22 @@ academicRuleRouter.get('/', academicRuleController.getAcademicRules)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicRule'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Academic rule not found
  *       500:
  *         description: Internal server error
  */
-academicRuleRouter.get('/:id', academicRuleController.getAcademicRuleById)
+academicRuleRouter.get(
+  '/:id',
+  requireAuth,
+  academicRuleController.getAcademicRuleById,
+)
 
 /**
  * @swagger
- * /academic-rules:
+ * /academic-rule:
  *   post:
  *     tags:
  *       - Academic Rules
@@ -89,14 +103,24 @@ academicRuleRouter.get('/:id', academicRuleController.getAcademicRuleById)
  *               $ref: '#/components/schemas/AcademicRule'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       500:
  *         description: Internal server error
  */
-academicRuleRouter.post('/', academicRuleController.createAcademicRule)
+academicRuleRouter.post(
+  '/',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(academicRuleSchema),
+  academicRuleController.createAcademicRule,
+)
 
 /**
  * @swagger
- * /academic-rules/{id}:
+ * /academic-rule/{id}:
  *   put:
  *     tags:
  *       - Academic Rules
@@ -120,16 +144,28 @@ academicRuleRouter.post('/', academicRuleController.createAcademicRule)
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AcademicRule'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic rule not found
  *       500:
  *         description: Internal server error
  */
-academicRuleRouter.put('/:id', academicRuleController.updateAcademicRule)
+academicRuleRouter.put(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  validateRequest(academicRuleSchema),
+  academicRuleController.updateAcademicRule,
+)
 
 /**
  * @swagger
- * /academic-rules/{id}:
+ * /academic-rule/{id}:
  *   delete:
  *     tags:
  *       - Academic Rules
@@ -143,12 +179,21 @@ academicRuleRouter.put('/:id', academicRuleController.updateAcademicRule)
  *     responses:
  *       200:
  *         description: Academic rule deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
  *         description: Academic rule not found
  *       500:
  *         description: Internal server error
  */
-academicRuleRouter.delete('/:id', academicRuleController.deleteAcademicRule)
+academicRuleRouter.delete(
+  '/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicRuleController.deleteAcademicRule,
+)
 
 export { academicRuleRouter }
 export default academicRuleRouter

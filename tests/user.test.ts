@@ -26,9 +26,11 @@ if (env.USE_REAL !== 'true') {
       const studentData: StudentData = {
         completed_courses: [
           {
-            course_id: 'course123',
-            course_name: 'Course 123',
+            courseNo: 123,
+            courseArabicName: 'Course 123',
             grade: 'A',
+            weight: '',
+            caption: '',
           },
         ],
         gpa: 90.0,
@@ -47,9 +49,11 @@ if (env.USE_REAL !== 'true') {
       const studentData: StudentData = {
         completed_courses: [
           {
-            course_id: 'course123',
-            course_name: 'Course 123',
+            courseNo: 123,
+            courseArabicName: 'Course 123',
             grade: 'A',
+            weight: '',
+            caption: '',
           },
         ],
         gpa: 90.0,

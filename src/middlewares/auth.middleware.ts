@@ -18,7 +18,7 @@ declare global {
 }
 export function requireAuth(requiredRole?: UserRole) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.token
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1]
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' })
     }
@@ -59,4 +59,27 @@ export function requireRole(...roles: UserRole[]) {
     }
     next()
   }
+}
+
+export function requireAuthorizeUserOrHigher(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.params.userId || req.params.id
+  if (!req.currentUser) {
+    return res
+      .status(401)
+      .json({ message: 'You must be logged in to access this resource' })
+  }
+  if (
+    req.currentUser.role !== 'admin' &&
+    req.currentUser.role !== 'supervisor' &&
+    req.currentUser.studentId !== userId
+  ) {
+    return res
+      .status(403)
+      .json({ message: 'You are not authorized to access this resource' })
+  }
+  next()
 }
