@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start:dev": "cross-env NODE_ENV=development nodemon dist/index.js",
-    "start:prod": "cross-env NODE_ENV=production nodemon dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production node dist/index.js",
     "seed": "cross-env NODE_ENV=development node  dist/src/seed.js",
     "test:unit": "cross-env NODE_ENV=test USE_REAL=false vitest",
     "test:integration": "cross-env NODE_ENV=test USE_REAL=true vitest",
