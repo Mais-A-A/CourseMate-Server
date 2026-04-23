@@ -13,7 +13,10 @@ passport.use(
     {
       clientID: envVars.CLIENT_ID,
       clientSecret: envVars.CLIENT_SECRET,
-      callbackURL: envVars.GOOGLE_CALLBACK_URL,
+      callbackURL:
+        envVars.NODE_ENV === 'production'
+          ? 'https://coursemate-server.onrender.com/api/auth/google/callback'
+          : envVars.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
