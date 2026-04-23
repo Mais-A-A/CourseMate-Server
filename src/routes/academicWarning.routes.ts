@@ -16,19 +16,28 @@ const academicWarningRouter = Router()
  *     AcademicWarning:
  *       type: object
  *       required:
- *         - userId
- *         - warningType
- *         - message
+ *         - user_id
+ *         - caption
+ *         - value
  *       properties:
- *         userId:
+ *         user_id:
  *           type: string
- *         warningType:
+ *         caption:
  *           type: string
- *         message:
+ *         value:
  *           type: string
- *         isResolved:
+ *         textColour:
+ *           type: string
+ *         orderNo:
+ *           type: number
+ *         warning_type:
+ *           type: string
+ *         is_resolved:
  *           type: boolean
  *           default: false
+ *         resolved_at:
+ *           type: string
+ *           format: date-time
  */
 
 /**
@@ -38,6 +47,9 @@ const academicWarningRouter = Router()
  *     tags:
  *       - Academic Warnings
  *     summary: Get all academic warnings
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all academic warnings
@@ -56,8 +68,7 @@ const academicWarningRouter = Router()
  */
 academicWarningRouter.get(
   '/',
-  requireAuth,
-  requireRole('admin', 'supervisor'),
+  requireAuth(),
   academicWarningController.getAcademicWarnings,
 )
 
@@ -68,6 +79,9 @@ academicWarningRouter.get(
  *     tags:
  *       - Academic Warnings
  *     summary: Get academic warnings by warning type
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: warningType
@@ -92,8 +106,7 @@ academicWarningRouter.get(
  */
 academicWarningRouter.get(
   '/warningType/:warningType',
-  requireAuth,
-  requireRole('admin', 'supervisor'),
+  requireAuth(),
   academicWarningController.getAcademicWarningsByWarningType,
 )
 
@@ -104,6 +117,9 @@ academicWarningRouter.get(
  *     tags:
  *       - Academic Warnings
  *     summary: Get academic warnings by user ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -130,7 +146,7 @@ academicWarningRouter.get(
  */
 academicWarningRouter.get(
   '/user/:userId',
-  requireAuth,
+  requireAuth(),
   requireAuthorizeUserOrHigher,
   academicWarningController.getAcademicWarningsByUserId,
 )
@@ -142,6 +158,9 @@ academicWarningRouter.get(
  *     tags:
  *       - Academic Warnings
  *     summary: Get an academic warning by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -164,7 +183,7 @@ academicWarningRouter.get(
  */
 academicWarningRouter.get(
   '/:id',
-  requireAuth,
+  requireAuth(),
   academicWarningController.getAcademicWarningById,
 )
 
@@ -175,6 +194,9 @@ academicWarningRouter.get(
  *     tags:
  *       - Academic Warnings
  *     summary: Create a new academic warning
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -199,7 +221,7 @@ academicWarningRouter.get(
  */
 academicWarningRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(academicWarningSchema),
   academicWarningController.createAcademicWarning,
@@ -212,6 +234,9 @@ academicWarningRouter.post(
  *     tags:
  *       - Academic Warnings
  *     summary: Resolve an academic warning
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -238,9 +263,8 @@ academicWarningRouter.post(
  */
 academicWarningRouter.put(
   '/:id/resolve',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
-  validateRequest(academicWarningSchema),
   academicWarningController.resolveAcademicWarning,
 )
 
@@ -251,6 +275,9 @@ academicWarningRouter.put(
  *     tags:
  *       - Academic Warnings
  *     summary: Update an academic warning by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -283,7 +310,7 @@ academicWarningRouter.put(
  */
 academicWarningRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(academicWarningSchema),
   academicWarningController.updateAcademicWarning,
@@ -296,6 +323,9 @@ academicWarningRouter.put(
  *     tags:
  *       - Academic Warnings
  *     summary: Delete an academic warning by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -316,7 +346,7 @@ academicWarningRouter.put(
  */
 academicWarningRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
 
   academicWarningController.deleteAcademicWarning,

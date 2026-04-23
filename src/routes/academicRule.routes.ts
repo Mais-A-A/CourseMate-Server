@@ -28,6 +28,9 @@ const academicRuleRouter = Router()
  *     tags:
  *       - Academic Rules
  *     summary: Get all academic rules
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all academic rules
@@ -44,7 +47,7 @@ const academicRuleRouter = Router()
  */
 academicRuleRouter.get(
   '/',
-  requireAuth,
+  requireAuth(),
   academicRuleController.getAcademicRules,
 )
 
@@ -55,6 +58,9 @@ academicRuleRouter.get(
  *     tags:
  *       - Academic Rules
  *     summary: Get an academic rule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -77,7 +83,7 @@ academicRuleRouter.get(
  */
 academicRuleRouter.get(
   '/:id',
-  requireAuth,
+  requireAuth(),
   academicRuleController.getAcademicRuleById,
 )
 
@@ -88,6 +94,9 @@ academicRuleRouter.get(
  *     tags:
  *       - Academic Rules
  *     summary: Create a new academic rule
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -112,7 +121,7 @@ academicRuleRouter.get(
  */
 academicRuleRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(academicRuleSchema),
   academicRuleController.createAcademicRule,
@@ -125,6 +134,9 @@ academicRuleRouter.post(
  *     tags:
  *       - Academic Rules
  *     summary: Update an academic rule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -157,7 +169,7 @@ academicRuleRouter.post(
  */
 academicRuleRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(academicRuleSchema),
   academicRuleController.updateAcademicRule,
@@ -170,6 +182,9 @@ academicRuleRouter.put(
  *     tags:
  *       - Academic Rules
  *     summary: Delete an academic rule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -190,7 +205,7 @@ academicRuleRouter.put(
  */
 academicRuleRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   academicRuleController.deleteAcademicRule,
 )

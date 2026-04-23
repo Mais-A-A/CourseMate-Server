@@ -16,25 +16,23 @@ declare global {
     }
   }
 }
-export function requireAuth(requiredRole?: UserRole) {
-  return (req: Request, res: Response, next: NextFunction) => {
+export function requireAuth() {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    console.log('Checking authentication for request to', req.path)
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1]
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' })
     }
     try {
-      const decoded = verifyJWT(token) as JwtPayload
+      const decoded = (await verifyJWT(token)) as JwtPayload
       if (!decoded) {
         res.clearCookie('token')
         return res
           .status(401)
           .json({ message: 'Session expired, please log in again' })
       }
-      if (requiredRole && decoded.role !== requiredRole) {
-        return res.status(403).json({ message: 'Forbidden' })
-      }
       req.currentUser = decoded
-      next()
+      return next()
     } catch (err) {
       console.error('JWT verification failed:', err)
       res.clearCookie('token')

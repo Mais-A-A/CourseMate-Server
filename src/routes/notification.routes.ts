@@ -36,6 +36,9 @@ const notificationRouter = Router()
  *     tags:
  *       - Notifications
  *     summary: Get all notifications for a user
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -60,7 +63,7 @@ const notificationRouter = Router()
  */
 notificationRouter.get(
   '/user/:userId',
-  requireAuth,
+  requireAuth(),
   notificationController.getNotificationsByUserId,
 )
 
@@ -71,6 +74,9 @@ notificationRouter.get(
  *     tags:
  *       - Notifications
  *     summary: Mark all notifications as read for a user
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -89,7 +95,7 @@ notificationRouter.get(
  */
 notificationRouter.put(
   '/user/:userId/read',
-  requireAuth,
+  requireAuth(),
 
   notificationController.markAllAsRead,
 )
@@ -101,6 +107,9 @@ notificationRouter.put(
  *     tags:
  *       - Notifications
  *     summary: Get a notification by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -123,7 +132,7 @@ notificationRouter.put(
  */
 notificationRouter.get(
   '/:notificationId',
-  requireAuth,
+  requireAuth(),
   notificationController.getNotificationById,
 )
 
@@ -134,6 +143,9 @@ notificationRouter.get(
  *     tags:
  *       - Notifications
  *     summary: Create a new notification
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -156,7 +168,7 @@ notificationRouter.get(
  */
 notificationRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   validateRequest(notificationSchema),
   notificationController.createNotification,
 )
@@ -168,6 +180,9 @@ notificationRouter.post(
  *     tags:
  *       - Notifications
  *     summary: Mark a notification as read
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -190,7 +205,7 @@ notificationRouter.post(
  */
 notificationRouter.put(
   '/:notificationId/read',
-  requireAuth,
+  requireAuth(),
   notificationController.markAsRead,
 )
 
@@ -201,6 +216,9 @@ notificationRouter.put(
  *     tags:
  *       - Notifications
  *     summary: Delete a notification by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -219,7 +237,7 @@ notificationRouter.put(
  */
 notificationRouter.delete(
   '/:notificationId',
-  requireAuth,
+  requireAuth(),
 
   notificationController.deleteNotification,
 )

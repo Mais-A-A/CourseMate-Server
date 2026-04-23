@@ -14,31 +14,26 @@ import { courseSectionRouter } from './src/routes/courseSection.routes.js'
 import { departmentRouter } from './src/routes/department.routes.js'
 import { scheduleRouter } from './src/routes/schedule.routes.js'
 import aiRoutes from './src/routes/ai.route.js'
-const app = express()
+import morgan from 'morgan'
 
+const app = express()
+app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
 app.use(passport.initialize())
-app.use('/api/auth', authRouter)
-app.use('/academic-rule', academicRuleRouter)
-app.use('/academic-warning', academicWarningRouter)
-app.use('/notification', notificationRouter)
-app.use('/user', userRouter)
-app.use(
-  '/ai',
-
-  aiRoutes,
-)
 
 app.get('/health', (req, res) => {
   res.send('Server is running!')
 })
 
+// Routes
+app.use('/api/auth', authRouter)
 app.use('/user', userRouter)
 app.use('/notification', notificationRouter)
 app.use('/academic-warning', academicWarningRouter)
 app.use('/academic-rule', academicRuleRouter)
 app.use('/academic-plan', academicPlanRouter)
+app.use('/ai', aiRoutes)
 app.use('/ai-recomendation', aiRecomendationRouter)
 app.use('/course', courseRouter)
 app.use('/course-section', courseSectionRouter)

@@ -13,21 +13,94 @@ const academicPlanRouter = Router()
  * @swagger
  * components:
  *   schemas:
+ *     CourseGrade:
+ *       type: object
+ *       properties:
+ *         gradeNGrade:
+ *           type: number
+ *         gradeResultGrade:
+ *           type: string
+ *         courseTaken:
+ *           type: number
+ *         gradeCGrade:
+ *           type: string
+ *
+ *     CourseInGroup:
+ *       type: object
+ *       required:
+ *         - courseNo
+ *       properties:
+ *         courseNo:
+ *           type: number
+ *         coursesArabicName:
+ *           type: string
+ *         coursesCreditHours:
+ *           type: number
+ *         courseLevel:
+ *           type: number
+ *         courseOrder:
+ *           type: number
+ *         courseSemester:
+ *           type: number
+ *           nullable: true
+ *         courseYear:
+ *           type: number
+ *           nullable: true
+ *         preCourse:
+ *           type: array
+ *           items:
+ *             type: number
+ *           default: []
+ *         courseGrades:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CourseGrade'
+ *           default: []
+ *
+ *     PlanGroup:
+ *       type: object
+ *       properties:
+ *         groupArabicName:
+ *           type: string
+ *         groupEnglishName:
+ *           type: string
+ *         groupNo:
+ *           type: number
+ *         calcMajorAvg:
+ *           type: boolean
+ *         requiredHours:
+ *           type: number
+ *         passedHours:
+ *           type: number
+ *         medicineCourses:
+ *           type: boolean
+ *         planYear:
+ *           type: number
+ *         majorNo:
+ *           type: number
+ *         groupCoursList:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CourseInGroup'
+ *           default: []
+ *
  *     AcademicPlan:
  *       type: object
  *       required:
- *         - plan_name
- *         - total_credits_required
- *         - required_courses
+ *         - majorNo
+ *         - planYear
  *       properties:
- *         plan_name:
- *           type: string
- *         total_credits_required:
+ *         majorNo:
  *           type: number
- *         required_courses:
+ *         planYear:
+ *           type: number
+ *         majorArabicName:
+ *           type: string
+ *         groups:
  *           type: array
  *           items:
- *             type: string
+ *             $ref: '#/components/schemas/PlanGroup'
+ *           default: []
  */
 
 /**
@@ -37,6 +110,9 @@ const academicPlanRouter = Router()
  *     tags:
  *       - Academic Plans
  *     summary: Get all academic plans
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all academic plans
@@ -55,8 +131,7 @@ const academicPlanRouter = Router()
  */
 academicPlanRouter.get(
   '/',
-  requireAuth,
-  requireRole('admin'),
+  requireAuth(),
   academicPlanController.getAcademicPlans,
 )
 
@@ -67,6 +142,9 @@ academicPlanRouter.get(
  *     tags:
  *       - Academic Plans
  *     summary: Get an academic plan by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -91,8 +169,7 @@ academicPlanRouter.get(
  */
 academicPlanRouter.get(
   '/:id',
-  requireAuth,
-  requireRole('admin'),
+  requireAuth(),
   academicPlanController.getAcademicPlanById,
 )
 
@@ -103,6 +180,9 @@ academicPlanRouter.get(
  *     tags:
  *       - Academic Plans
  *     summary: Create a new academic plan
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -127,7 +207,7 @@ academicPlanRouter.get(
  */
 academicPlanRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(AcademicPlanSchema),
   academicPlanController.createAcademicPlan,
@@ -140,6 +220,9 @@ academicPlanRouter.post(
  *     tags:
  *       - Academic Plans
  *     summary: Update an academic plan by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -172,7 +255,7 @@ academicPlanRouter.post(
  */
 academicPlanRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(AcademicPlanSchema),
   academicPlanController.updateAcademicPlan,
@@ -185,6 +268,9 @@ academicPlanRouter.put(
  *     tags:
  *       - Academic Plans
  *     summary: Delete an academic plan by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -205,7 +291,7 @@ academicPlanRouter.put(
  */
 academicPlanRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   academicPlanController.deleteAcademicPlan,
 )

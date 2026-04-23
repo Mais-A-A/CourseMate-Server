@@ -19,11 +19,12 @@ if (env.USE_REAL !== 'true') {
               {
                 courseNo: 101,
                 preCourse: [],
-                courseGrades: ['A'],
+                courseGrades: [{ gradeCGrade: 'A', gradeResultGrade: 'P', gradeNGrade: 0, courseTaken: 1 }],
               },
             ],
           },
         ],
+        levels: [],
       }
       const plan = await academicPlanService.createAcademicPlan(planData)
       expect(plan).toHaveProperty('_id')
@@ -49,11 +50,12 @@ if (env.USE_REAL !== 'true') {
               {
                 courseNo: 201,
                 preCourse: [],
-                courseGrades: ['B'],
+                courseGrades: [{ gradeCGrade: 'B', gradeResultGrade: 'P', gradeNGrade: 0, courseTaken: 1 }],
               },
             ],
           },
         ],
+        levels: [],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
       const retrievedPlan = await academicPlanService.getAcademicPlanById(
@@ -75,11 +77,15 @@ if (env.USE_REAL !== 'true') {
               {
                 courseNo: 301,
                 preCourse: [],
-                courseGrades: ['A', 'B'],
+                courseGrades: [
+                  { gradeCGrade: 'A', gradeResultGrade: 'P', gradeNGrade: 0, courseTaken: 1 },
+                  { gradeCGrade: 'B', gradeResultGrade: 'P', gradeNGrade: 0, courseTaken: 1 },
+                ],
               },
             ],
           },
         ],
+        levels: [],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
       const updatedData: Partial<AcademicPlan> = {
@@ -98,6 +104,7 @@ if (env.USE_REAL !== 'true') {
         majorNo: 21,
         planYear: 2021,
         groups: [],
+        levels: [],
       }
       const createdPlan = await academicPlanService.createAcademicPlan(planData)
       const deletedPlan = await academicPlanService.deleteAcademicPlan(

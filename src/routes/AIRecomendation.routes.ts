@@ -36,6 +36,9 @@ const aiRecomendationRouter = Router()
  *     tags:
  *       - AI Recommendations
  *     summary: Get all AI recommendations
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all AI recommendations
@@ -52,7 +55,7 @@ const aiRecomendationRouter = Router()
  */
 aiRecomendationRouter.get(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin', 'supervisor'),
   aiRecomendationController.getAIRecomendations,
 )
@@ -64,6 +67,9 @@ aiRecomendationRouter.get(
  *     tags:
  *       - AI Recommendations
  *     summary: Get AI recommendation by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -86,7 +92,7 @@ aiRecomendationRouter.get(
  */
 aiRecomendationRouter.get(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin', 'supervisor'),
   aiRecomendationController.getAIRecomendationById,
 )
@@ -98,6 +104,9 @@ aiRecomendationRouter.get(
  *     tags:
  *       - AI Recommendations
  *     summary: Create AI recommendation
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -118,7 +127,7 @@ aiRecomendationRouter.get(
  */
 aiRecomendationRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   validateRequest(AIRecomendationSchema),
   aiRecomendationController.createAIRecomendation,
 )
@@ -130,6 +139,9 @@ aiRecomendationRouter.post(
  *     tags:
  *       - AI Recommendations
  *     summary: Update AI recommendation by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -160,7 +172,7 @@ aiRecomendationRouter.post(
  */
 aiRecomendationRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   validateRequest(AIRecomendationSchema),
   requireRole('admin'),
   aiRecomendationController.updateAIRecomendation,
@@ -173,6 +185,9 @@ aiRecomendationRouter.put(
  *     tags:
  *       - AI Recommendations
  *     summary: Delete AI recommendation by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -191,7 +206,7 @@ aiRecomendationRouter.put(
  */
 aiRecomendationRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   aiRecomendationController.deleteAIRecomendation,
 )

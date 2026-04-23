@@ -31,7 +31,7 @@ class AcademicWarningService {
 
   async getAcademicWarningsByUserId(userId: string) {
     return await AcademicWarning.find({ user_id: userId })
-      .sort({ createdAt: -1 })
+      .sort({ issued_at: -1 })
       .lean()
   }
 

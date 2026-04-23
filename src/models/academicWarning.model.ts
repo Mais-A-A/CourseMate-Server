@@ -7,6 +7,9 @@ const academicWarningSchema = new Schema(
     value: { type: String, required: true },
     textColour: { type: String },
     orderNo: { type: Number },
+    warning_type: { type: String },
+    is_resolved: { type: Boolean, default: false },
+    resolved_at: { type: Date },
   },
   {
     timestamps: {

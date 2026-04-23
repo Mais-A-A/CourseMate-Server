@@ -28,6 +28,7 @@ class UserService {
     if (updateData.email) {
       const existingUser = await User.findOne({
         email: updateData.email,
+        _id: { $ne: id },
       })
 
       if (existingUser) {

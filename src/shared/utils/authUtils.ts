@@ -52,9 +52,12 @@ export function generateJWT(user: UniversityUser): string {
   return token
 }
 
-export function verifyJWT(token: string): UniversityUser | null {
+export async function verifyJWT(token: string): Promise<UniversityUser | null> {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as UniversityUser
+    const decoded = (await jwt.verify(
+      token,
+      process.env.JWT_SECRET!,
+    )) as UniversityUser
     return decoded
   } catch (err) {
     console.error('JWT verification failed:', err)

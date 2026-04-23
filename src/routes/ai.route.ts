@@ -21,11 +21,17 @@ const router = Router()
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               prompt:
- *                 type: string
  *             required:
- *               - prompt
+ *               - message
+ *               - sessionId
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 1000
+ *               sessionId:
+ *                 type: string
+ *                 minLength: 1
  *     responses:
  *       200:
  *         description: AI response generated successfully
