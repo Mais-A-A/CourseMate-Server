@@ -72,6 +72,9 @@ departmentRouter.get('/:id', departmentController.getDepartmentById)
  *     tags:
  *       - Departments
  *     summary: Create a new department
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -94,7 +97,7 @@ departmentRouter.get('/:id', departmentController.getDepartmentById)
  */
 departmentRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(DepartmentSchema),
   departmentController.createDepartment,
@@ -107,6 +110,9 @@ departmentRouter.post(
  *     tags:
  *       - Departments
  *     summary: Update a department by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -137,7 +143,7 @@ departmentRouter.post(
  */
 departmentRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(DepartmentSchema),
   departmentController.updateDepartment,
@@ -150,6 +156,9 @@ departmentRouter.put(
  *     tags:
  *       - Departments
  *     summary: Delete a department by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -168,7 +177,7 @@ departmentRouter.put(
  */
 departmentRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   departmentController.deleteDepartment,
 )

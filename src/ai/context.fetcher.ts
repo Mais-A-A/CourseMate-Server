@@ -3,6 +3,7 @@ import { User } from '../models/user.model.js'
 import { AcademicWarning } from '../models/academicWarning.model.js'
 import { AcademicRule } from '../models/academicRule.model.js'
 
+
 export async function fetchUserContext(userId: string) {
   const warningFilter: Record<string, unknown> = {}
   let user

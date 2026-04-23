@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { connectDatabase } from './config/db.js'
 import AcademicPlan from './models/academicPlan.model.js'
 import Department from './models/department.model.js'
@@ -596,6 +598,13 @@ export const seed = async () => {
     8999: '98',
   }
 
+  const toGradeObj = (g: string) => ({
+    gradeNGrade: isNaN(Number(g)) ? 0 : Number(g),
+    gradeResultGrade: 'P',
+    courseTaken: 1,
+    gradeCGrade: g,
+  })
+
   const planCourse = (no: number, order: number) => ({
     courseNo: no,
     coursesArabicName:
@@ -608,10 +617,9 @@ export const seed = async () => {
       courseData.find((c) => c.courseNo === no)?.courseSemester ?? null,
     courseYear: courseData.find((c) => c.courseNo === no)?.courseYear ?? null,
     preCourse: courseData.find((c) => c.courseNo === no)?.preCourse ?? [],
-    courseGrades: gradeMap[no] ? [gradeMap[no]] : [],
+    courseGrades: gradeMap[no] ? [toGradeObj(gradeMap[no])] : [],
   })
 
-  // ─── Academic Plan (خطة علم الحاسوب 2022 – 129 ساعة) ───────────────────────
   const plan = await AcademicPlanModel.create({
     majorNo: 23103,
     planYear: 2022,
@@ -721,6 +729,166 @@ export const seed = async () => {
     ],
   })
 
+  const dataRoot = join(process.cwd(), 'محمد الجعبري - مشروع')
+  const gradesJson = JSON.parse(
+    readFileSync(join(dataRoot, 'العلامات', 'العلامات.json'), 'utf-8'),
+  ) as { data: Array<{ grades: any[] }> }
+  const semestersJson = JSON.parse(
+    readFileSync(
+      join(dataRoot, 'الوضع الاكاديمي', 'خلاصة الفصول.json'),
+      'utf-8',
+    ),
+  ) as { data: Array<{ semesters: any[] }> }
+  const plansJson = JSON.parse(
+    readFileSync(
+      join(dataRoot, 'الوضع الاكاديمي', 'الخطة الاسترشادية.json'),
+      'utf-8',
+    ),
+  ) as { data: Array<{ groups: any[] }> }
+  const levelsJson = JSON.parse(
+    readFileSync(
+      join(dataRoot, 'الوضع الاكاديمي', 'توزيع المساقات على الفصول.json'),
+      'utf-8',
+    ),
+  ) as { data: Array<{ levels: any[] }> }
+
+  const mapCourse = (c: any) => ({
+    courseNo: c.courseNo,
+    coursesArabicName: c.coursesArabicName,
+    coursesCreditHours: c.coursesCreditHours,
+    courseLevel: c.courseLevel ?? 1,
+    courseOrder: c.courseOrder ?? 1,
+    courseSemester: c.courseSemester ?? null,
+    courseYear: c.courseYear ?? null,
+    alternativeNo: c.alternativeNo ?? undefined,
+    preCourse: (c.preCourse ?? []).map((p: any) =>
+      typeof p === 'number' ? p : p.prerequisitesNo,
+    ),
+    courseGrades: (c.courseGrades ?? []).map((gr: any) => ({
+      gradeNGrade: gr.gradeNGrade,
+      gradeResultGrade: gr.gradeResultGrade,
+      courseTaken: gr.courseTaken,
+      gradeCGrade: gr.gradeCGrade,
+    })),
+  })
+
+  // ─── Step 1: Create one AcademicPlan per student ─────────────────────────
+  const studentPlans = await Promise.all(
+    plansJson.data.map((planEntry, i) => {
+      const groups: any[] = planEntry.groups ?? []
+      const levels: any[] = levelsJson.data[i]?.levels ?? []
+      return AcademicPlanModel.create({
+        majorNo: groups[0]?.majorNo ?? 23103,
+        planYear: groups[0]?.planYear ?? 2025,
+        majorArabicName: 'علم الحاسوب',
+        groups: groups.map((g: any) => ({
+          groupArabicName: g.groupArabicName,
+          groupEnglishName: g.groupEnglishName ?? '',
+          groupNo: g.groupNo,
+          calcMajorAvg: !!g.calcMajorAvg,
+          requiredHours: g.requiredHours,
+          passedHours: g.passedHours,
+          medicineCourses: !!g.medicineCourses,
+          planYear: g.planYear,
+          majorNo: g.majorNo,
+          groupCoursList: (g.groupCoursList ?? []).map(mapCourse),
+        })),
+        levels: levels.map((l: any) => ({
+          id: l.id,
+          groupArabicName: l.groupArabicName,
+          groupEnglishName: l.groupEnglishName ?? undefined,
+          requiredHours: l.requiredHours,
+          groupCoursList: (l.groupCoursList ?? []).map(mapCourse),
+        })),
+      })
+    }),
+  )
+
+  // ─── Step 2: Create 86 student users ─────────────────────────────────────
+  const bulkStudents = await Promise.all(
+    gradesJson.data.map((entry, i) => {
+      const grades: any[] = entry.grades ?? []
+      const actualStudentNo: number = grades[0]?.studentNo
+      if (!actualStudentNo) return Promise.resolve(null)
+
+      const completedCourses = grades.map((g: any) => ({
+        courseNo: g.courseNo,
+        courseArabicName: g.courseArabicName,
+        academicYear: g.academicYear,
+        semesterNo: g.semesterNo,
+        creditHours: g.creditHours,
+        grade: g.grade,
+        weight: g.weight ?? '',
+        caption: g.caption ?? '',
+      }))
+
+      const numericGrades = completedCourses
+        .filter((c) => !isNaN(Number(c.grade)))
+        .map((c) => Number(c.grade))
+
+      const gpa = Math.min(
+        100,
+        Math.max(
+          45,
+          numericGrades.length > 0
+            ? Math.round(
+                (numericGrades.reduce((a, b) => a + b, 0) /
+                  numericGrades.length) *
+                  10,
+              ) / 10
+            : 70,
+        ),
+      )
+
+      return UserModel.create({
+        name: `طالب ${actualStudentNo}`,
+        email: `${actualStudentNo}@ppu.edu`,
+        password: 'pass1234',
+        role: 'student',
+        student_data: {
+          studentNo: actualStudentNo,
+          gpa,
+          academic_plan: studentPlans[i]?._id ?? plan._id,
+          supervisor: {
+            supervisorNo: 444,
+            supervisorArabicName: 'محمد جواد عطا الجعبري',
+            supervisorEmail: 'jabary980@ppu.edu',
+          },
+          notifications: [],
+          completed_courses: completedCourses,
+        },
+      })
+    }),
+  )
+
+  // ─── Step 3: Create semester schedules for all 86 students ───────────────
+  await Promise.all(
+    semestersJson.data.map((semEntry, i) => {
+      const student = bulkStudents[i]
+      if (!student) return Promise.resolve()
+      const semesters: any[] = semEntry.semesters ?? []
+      if (semesters.length === 0) return Promise.resolve()
+      const actualStudentNo: number = semesters[0]?.studentNo
+      return ScheduleModel.create(
+        semesters.map((s: any) => ({
+          student_id: student._id,
+          studentNo: actualStudentNo,
+          academicYear: s.academicYear,
+          academicYearTitle: s.academicYearTitle,
+          semesterNo: s.semesterNo,
+          semesterTitle: s.semesterTitle,
+          semesterHours: s.semesterHours,
+          passHours: s.passHours,
+          semesterAverage: Number(s.semesterAverage),
+          majorAverage: s.majorAverage,
+          accumulativeAverage: s.accumulativeAverage,
+          academicWarning: String(s.academicWarning),
+          academicStatus: s.academicStatus,
+        })),
+      )
+    }),
+  )
+
   // ─── Course Sections (2025 / Semester 1) ─────────────────────────────────
   await CourseSectionModel.create([
     {
@@ -824,7 +992,6 @@ export const seed = async () => {
     role: 'admin',
   })
 
-  // Student – Hasan Mohammad Al-Saafin (student no. 221141)
   const student = await UserModel.create({
     name: 'Hasan Mohammad Al-Saafin',
     email: 'hasan@gmail.com',
@@ -1171,11 +1338,234 @@ export const seed = async () => {
     { $push: { 'student_data.notifications': notification._id } },
   )
 
-  // ─── Academic Rule ──────────────────────────────────────────────────────────
-  await AcademicRuleModel.create({
-    rule_type: 'min_gpa',
-    description: 'Students with GPA below 60 receive an academic warning.',
-  })
+  // ─── Academic Rules (PPU Bachelor's Degree Bylaws) ─────────────────────────
+  await AcademicRuleModel.create([
+    // Academic Load
+    {
+      rule_type: 'academic_load',
+      description:
+        'الحد الأقصى للساعات المعتمدة في الفصل الدراسي العادي هو 18 ساعة معتمدة.',
+    },
+    {
+      rule_type: 'academic_load',
+      description:
+        'الحد الأقصى للساعات المعتمدة في الفصل الصيفي هو 10 ساعات معتمدة.',
+    },
+    {
+      rule_type: 'academic_load',
+      description:
+        'يمكن رفع الحد الأقصى إلى 21 ساعة في الفصل العادي بموافقة رئيس القسم إذا كان معدل الفصل السابق ومعدله التراكمي 80% فأكثر، أو إذا كانت التخرج مرتبطة بها.',
+    },
+    {
+      rule_type: 'academic_load',
+      description: 'الحد الأدنى للتسجيل في الفصل الدراسي العادي هو 12 ساعة معتمدة.',
+    },
+    // Study Duration
+    {
+      rule_type: 'study_duration',
+      description:
+        'مدة الدراسة لبرامج الهندسة: 4 سنوات كحد أدنى و7 سنوات كحد أقصى.',
+    },
+    {
+      rule_type: 'study_duration',
+      description:
+        'مدة الدراسة للبرامج غير الهندسية: 3 سنوات كحد أدنى و6 سنوات كحد أقصى.',
+    },
+    // Attendance
+    {
+      rule_type: 'attendance',
+      description:
+        'الغياب المسموح به هو محاضرتان نظريتان أو ما يعادلهما لكل ساعة معتمدة في الفصل الدراسي.',
+    },
+    {
+      rule_type: 'attendance',
+      description:
+        'يُحرم الطالب الذي يتجاوز حد الغياب المسموح به من الامتحان النهائي ويُعطى صفراً.',
+    },
+    {
+      rule_type: 'attendance',
+      description:
+        'في حالة أربع غيابات بعذر مقبول، يُسحب الطالب تلقائياً من المساق دون الرسوب.',
+    },
+    // Withdrawal & Add/Drop
+    {
+      rule_type: 'withdrawal',
+      description:
+        'خلال الأسبوع الأول: يُسمح بالانسحاب دون خسارة الرسوم.',
+    },
+    {
+      rule_type: 'withdrawal',
+      description:
+        'من الأسبوع الأول حتى الأسبوع العاشر: يُسجَّل الانسحاب بالرمز "W" ولا يؤثر على المعدل، لكن تُفقد الرسوم.',
+    },
+    {
+      rule_type: 'withdrawal',
+      description:
+        'بعد الأسبوع العاشر: يُسجَّل الانسحاب بالرمز "WF" (انسحاب بإخفاق) ويُحتسب 45% في المعدل التراكمي.',
+    },
+    // Deferral
+    {
+      rule_type: 'deferral',
+      description:
+        'يحق للطالب تأجيل الدراسة لمدة أقصاها سنتان أكاديميتان إجمالياً (متصلتان أو منفصلتان).',
+    },
+    {
+      rule_type: 'deferral',
+      description:
+        'لا يحق للطلاب الجدد أو المحوَّلين التأجيل قبل إتمام فصل دراسي كامل.',
+    },
+    {
+      rule_type: 'deferral',
+      description:
+        'مدة التأجيل لا تُحتسب ضمن المدة القصوى للتخرج.',
+    },
+    // Course Repetition
+    {
+      rule_type: 'course_repetition',
+      description:
+        'لا يُسمح بإعادة المساق إذا كانت علامة الطالب فيه 70% أو أكثر.',
+    },
+    {
+      rule_type: 'course_repetition',
+      description:
+        'عند إعادة مساق راسب، تُحتسب العلامة الجديدة فقط في المعدل التراكمي، وتظهر جميع المحاولات في كشف العلامات.',
+    },
+    {
+      rule_type: 'course_repetition',
+      description:
+        'تُحتسب الساعات المعتمدة للمساق المُعاد مرة واحدة فقط لمتطلبات التخرج. يُعلَّم الرسوب الأول بـ "1R" والثاني بـ "R2" عند التخرج.',
+    },
+    // Grading
+    {
+      rule_type: 'grading',
+      description:
+        'سلم العلامات: 90-100% ممتاز، 80-89% جيد جداً، 70-79% جيد، 60-69% مقبول، أقل من 60% راسب.',
+    },
+    {
+      rule_type: 'grading',
+      description:
+        'يشمل التقييم النهائي أعمال الفصل (امتحانان معلَنان على الأقل وتقارير ومشاركة) مضافاً إليها الامتحان النهائي الشامل.',
+    },
+    {
+      rule_type: 'grading',
+      description:
+        'الغياب عن الامتحان النهائي يُعطي علامة صفر. الغياب عن الامتحانات الجزئية بعذر مقبول يُتيح امتحاناً بديلاً من 90 درجة.',
+    },
+    {
+      rule_type: 'grading',
+      description:
+        'علامة الـ "I" (غير مكتمل): تُمنح بعذر مقبول، ويجب أداء الامتحان في الأسبوع الأول من الفصل التالي وإلا تحوّلت إلى صفر (45%).',
+    },
+    {
+      rule_type: 'grading',
+      description:
+        'المعدل الفصلي = مجموع (علامة المساق × الساعات المعتمدة) ÷ مجموع الساعات المعتمدة. المعدل التراكمي يُحسب بنفس الطريقة باستخدام آخر علامة لكل مساق.',
+    },
+    // Honors Classification
+    {
+      rule_type: 'honors_classification',
+      description:
+        'تصنيف التخرج بالمعدل التراكمي: 90% فأكثر امتياز عالٍ (يشترط معدل تخصصي 90%+)، 85-89.9% ممتاز، 78-84.9% جيد جداً، 71-77.9% جيد، 68-70.9% مقبول جيد، 65-67.9% مقبول.',
+    },
+    // Academic Warning
+    {
+      rule_type: 'academic_warning',
+      description:
+        'يُوجَّه تحذير أكاديمي إذا انخفض المعدل التراكمي عن 65% (ما عدا الفصل الأول).',
+    },
+    {
+      rule_type: 'academic_warning',
+      description:
+        'يُوجَّه تحذير أكاديمي إذا انخفض معدل التخصص عن 70% بعد اجتياز 18 ساعة تخصصية أو أكثر.',
+    },
+    {
+      rule_type: 'academic_warning',
+      description:
+        'الطالب المُنذَر لا يُسجَّل أكثر من 15 ساعة معتمدة (18 إذا اقتضت التخرج)، ويجب إزالة أسباب الإنذار في الفصل التالي.',
+    },
+    // Academic Dismissal
+    {
+      rule_type: 'academic_dismissal',
+      description:
+        'يُفصل الطالب أكاديمياً إذا لم يُزِل الإنذار بعد فصلين دراسيين، أو إذا لم يُكمل تسجيله في أي فصل، أو إذا تجاوز المدة القصوى للدراسة.',
+    },
+    {
+      rule_type: 'academic_dismissal',
+      description:
+        'يُفصل الطالب إذا كان معدله في الفصل الأول أقل من 55%، أو إذا انخفض معدله التراكمي عن 55% في أي فصل بعد الأول.',
+    },
+    {
+      rule_type: 'academic_dismissal',
+      description:
+        'الطالب الذي أتم 80% من خطته وصدر بحقه فصل، يمكنه مواصلة الدراسة إذا كان معدله 65% أو أكثر، على أن يتخرج خلال 3 فصول متتالية.',
+    },
+    // Graduation Requirements
+    {
+      rule_type: 'graduation',
+      description:
+        'شروط التخرج: اجتياز جميع المساقات المطلوبة بعلامة 60% على الأقل لكل منها.',
+    },
+    {
+      rule_type: 'graduation',
+      description:
+        'شروط التخرج: الحصول على معدل تراكمي لا يقل عن 65%.',
+    },
+    {
+      rule_type: 'graduation',
+      description:
+        'شروط التخرج: الحصول على معدل تخصصي لا يقل عن 70%.',
+    },
+    {
+      rule_type: 'graduation',
+      description:
+        'شروط التخرج: إتمام التدريب الميداني المطلوب وساعات العمل التطوعي المقررة.',
+    },
+    // Merit Scholarships
+    {
+      rule_type: 'merit_scholarship',
+      description:
+        'إعفاء 100% من الرسوم الدراسية: معدل فصلي 95% فأكثر مع اجتياز 15 ساعة معتمدة على الأقل وعدم وجود ملاحظات تأديبية.',
+    },
+    {
+      rule_type: 'merit_scholarship',
+      description:
+        'إعفاء ثلثَي الرسوم الدراسية: معدل فصلي 90-94.9% مع الشروط ذاتها.',
+    },
+    {
+      rule_type: 'merit_scholarship',
+      description:
+        'إعفاء 40% من الرسوم الدراسية: معدل فصلي 87-89.9% مع الشروط ذاتها.',
+    },
+    // Honor Roll
+    {
+      rule_type: 'honor_roll',
+      description:
+        'قائمة شرف الرئيس: معدل فصلي 90% فأكثر (وفق شروط منحة الامتياز).',
+    },
+    {
+      rule_type: 'honor_roll',
+      description:
+        'قائمة شرف العميد: معدل فصلي 87% فأكثر (وفق شروط منحة الامتياز).',
+    },
+    // Tuition Refund
+    {
+      rule_type: 'tuition_refund',
+      description:
+        'سياسة استرداد الرسوم للطلاب الجدد: قبل بدء الفصل لا يُسترد شيء، الأسبوع الأول 25%، الأسبوع الثاني 50%، بعد أسبوعين لا يُسترد شيء.',
+    },
+    // Semester structure
+    {
+      rule_type: 'semester_structure',
+      description:
+        'الفصل الدراسي العادي يتكون من 16 أسبوعاً دراسياً بما في ذلك مدة الامتحانات. الفصل الصيفي يتكون من 8 أسابيع بما في ذلك الامتحانات.',
+    },
+    // Capstone Projects
+    {
+      rule_type: 'capstone_project',
+      description:
+        'يُمنح الطالب أسبوعين إضافيين بعد امتحانات الفصل لإنهاء مشروع التخرج. المشروع غير المكتمل يُعطى "W" إذا كانت النواقص قابلة للإصلاح في الفصل التالي.',
+    },
+  ])
 
   // ─── Academic Warnings (from registrationinfo/academicInfo) ────────────────
   await AcademicWarningModel.create([
@@ -1428,6 +1818,51 @@ export const seed = async () => {
       'Based on completed semesters 1–6 and a 95.8 accumulative average, the student is ready for year-4 courses: Software Engineering, Theory of Computation, and Graduation Project Introduction.',
     confidenceScore: 0.95,
   })
+
+  // ─── College Course Sections (برامج الكليات, semester 2 / 2025) ─────────────
+  const collegesDir = join(dataRoot, 'برامج الكليات')
+  const collegeFiles = [
+    'كلية التمريض.json',
+    'كلية الدراسات الثنائية.json',
+    'كلية الطب .json',
+    'كلية العلوم الادارية.json',
+    'كلية العلوم الانسانية.json',
+    'كلية العلوم التطبيقية.json',
+    'كلية الفنون والتصميم.json',
+    'كلية المهن.json',
+    'كلية الهندسة.json',
+    'كلية تكنولوجيا المعلومات.json',
+    'كلية طب الاسنان.json',
+  ]
+  for (const file of collegeFiles) {
+    const sections: any[] =
+      (JSON.parse(readFileSync(join(collegesDir, file), 'utf-8')) as any)
+        .data ?? []
+    if (sections.length === 0) continue
+    await CourseSectionModel.insertMany(
+      sections.map((s: any) => ({
+        acdYear: s.acdYear,
+        semesterNo: s.semesterNo,
+        courseNo: s.courseNo,
+        courseName: s.courseName,
+        courseCredietHrs: s.courseCredietHrs,
+        sectionNo: s.sectionNo,
+        labSectionNo: s.labSectionNo ?? -1,
+        roomName: s.roomName,
+        buildingName: s.buildingName,
+        supervisorName: s.supervisorName,
+        capacity: s.capacity,
+        counter: s.counter ?? 0,
+        majorNo: s.majorNo,
+        isOpen: s.isOpen ?? true,
+        packageCaption: s.packageCaption,
+        secTime: s.secTime,
+        collageArabicName: s.collageArabicName,
+        majorArabicName: s.majorArabicName,
+        lSectionNo: s.lSectionNo ?? '',
+      })),
+    )
+  }
 
   console.log('Database seeded successfully')
 }

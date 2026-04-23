@@ -12,37 +12,54 @@ const courseSectionRouter = Router()
  *     CourseSection:
  *       type: object
  *       required:
- *         - course_id
- *         - semester_id
- *         - instructor
- *         - class_days
- *         - start_time
- *         - end_time
- *         - classroom
- *         - capacity
- *         - available_seats
+ *         - acdYear
+ *         - semesterNo
+ *         - courseNo
+ *         - courseName
+ *         - courseCredietHrs
+ *         - sectionNo
  *       properties:
- *         course_id:
+ *         acdYear:
+ *           type: number
+ *         semesterNo:
+ *           type: number
+ *         courseNo:
+ *           type: number
+ *         courseName:
  *           type: string
- *         semester_id:
+ *         courseCredietHrs:
+ *           type: number
+ *         sectionNo:
+ *           type: number
+ *         labSectionNo:
+ *           type: number
+ *           default: -1
+ *         roomName:
  *           type: string
- *         instructor:
+ *         buildingName:
  *           type: string
- *         class_days:
- *           type: array
- *           items:
- *             type: string
- *             enum: [Sat, Sun, Mon, Tue, Wed, Thu]
- *         start_time:
- *           type: string
- *         end_time:
- *           type: string
- *         classroom:
+ *         supervisorName:
  *           type: string
  *         capacity:
  *           type: number
- *         available_seats:
+ *         counter:
  *           type: number
+ *           default: 0
+ *         majorNo:
+ *           type: number
+ *         isOpen:
+ *           type: boolean
+ *           default: true
+ *         packageCaption:
+ *           type: string
+ *         secTime:
+ *           type: string
+ *         collageArabicName:
+ *           type: string
+ *         majorArabicName:
+ *           type: string
+ *         lSectionNo:
+ *           type: string
  */
 
 /**
@@ -102,6 +119,9 @@ courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/CourseSection'
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Course section created successfully
@@ -118,7 +138,7 @@ courseSectionRouter.get('/:id', courseSectionController.getCourseSectionById)
  */
 courseSectionRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(CourseSectionSchema),
   courseSectionController.createCourseSection,
@@ -137,6 +157,9 @@ courseSectionRouter.post(
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -161,7 +184,7 @@ courseSectionRouter.post(
  */
 courseSectionRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(CourseSectionSchema),
   courseSectionController.updateCourseSection,
@@ -180,6 +203,9 @@ courseSectionRouter.put(
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Course section deleted successfully
@@ -192,7 +218,7 @@ courseSectionRouter.put(
  */
 courseSectionRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   courseSectionController.deleteCourseSection,
 )

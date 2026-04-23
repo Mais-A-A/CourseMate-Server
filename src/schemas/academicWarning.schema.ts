@@ -6,5 +6,8 @@ export const academicWarningSchema = z.object({
   value: z.string(),
   textColour: z.string().optional(),
   orderNo: z.number().optional(),
+  warning_type: z.string().optional(),
+  is_resolved: z.boolean().optional(),
+  resolved_at: z.date().optional(),
 })
 export type AcademicWarning = z.infer<typeof academicWarningSchema>

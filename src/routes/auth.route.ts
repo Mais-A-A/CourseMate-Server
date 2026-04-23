@@ -72,7 +72,7 @@ authRouter.get(
  *       401:
  *         description: Unauthorized
  */
-authRouter.post('/logout', requireAuth, (req: Request, res: Response) => {
+authRouter.post('/logout', requireAuth(), (req: Request, res: Response) => {
   res
     .clearCookie('token', {
       httpOnly: true,

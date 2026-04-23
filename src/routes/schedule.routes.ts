@@ -13,21 +13,36 @@ const scheduleRouter = Router()
  *       type: object
  *       required:
  *         - student_id
- *         - semester_id
+ *         - studentNo
+ *         - academicYear
+ *         - semesterNo
  *       properties:
  *         student_id:
  *           type: string
- *         semester_id:
+ *         studentNo:
+ *           type: number
+ *         academicYear:
+ *           type: number
+ *         academicYearTitle:
  *           type: string
- *         course_sections:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               course_section_id:
- *                 type: array
- *                 items:
- *                   type: string
+ *         semesterNo:
+ *           type: number
+ *         semesterTitle:
+ *           type: string
+ *         semesterHours:
+ *           type: number
+ *         passHours:
+ *           type: number
+ *         semesterAverage:
+ *           type: number
+ *         majorAverage:
+ *           type: number
+ *         accumulativeAverage:
+ *           type: number
+ *         academicWarning:
+ *           type: string
+ *         academicStatus:
+ *           type: string
  */
 
 /**
@@ -37,6 +52,9 @@ const scheduleRouter = Router()
  *     tags:
  *       - Schedules
  *     summary: Get all schedules
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all schedules
@@ -49,7 +67,7 @@ const scheduleRouter = Router()
  *       401:
  *         description: Unauthorized
  */
-scheduleRouter.get('/', requireAuth, scheduleController.getSchedules)
+scheduleRouter.get('/', requireAuth(), scheduleController.getSchedules)
 
 /**
  * @swagger
@@ -58,6 +76,9 @@ scheduleRouter.get('/', requireAuth, scheduleController.getSchedules)
  *     tags:
  *       - Schedules
  *     summary: Get a schedule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -76,7 +97,7 @@ scheduleRouter.get('/', requireAuth, scheduleController.getSchedules)
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.get('/:id', requireAuth, scheduleController.getScheduleById)
+scheduleRouter.get('/:id', requireAuth(), scheduleController.getScheduleById)
 
 /**
  * @swagger
@@ -85,6 +106,9 @@ scheduleRouter.get('/:id', requireAuth, scheduleController.getScheduleById)
  *     tags:
  *       - Schedules
  *     summary: Create a new schedule
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -105,7 +129,7 @@ scheduleRouter.get('/:id', requireAuth, scheduleController.getScheduleById)
  */
 scheduleRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   validateRequest(ScheduleSchema),
   scheduleController.createSchedule,
 )
@@ -117,6 +141,9 @@ scheduleRouter.post(
  *     tags:
  *       - Schedules
  *     summary: Update a schedule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,7 +172,7 @@ scheduleRouter.post(
  */
 scheduleRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   validateRequest(ScheduleSchema),
   scheduleController.updateSchedule,
 )
@@ -157,6 +184,9 @@ scheduleRouter.put(
  *     tags:
  *       - Schedules
  *     summary: Delete a schedule by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -171,7 +201,7 @@ scheduleRouter.put(
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.delete('/:id', requireAuth, scheduleController.deleteSchedule)
+scheduleRouter.delete('/:id', requireAuth(), scheduleController.deleteSchedule)
 
 export { scheduleRouter }
 export default scheduleRouter

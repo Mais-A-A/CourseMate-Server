@@ -12,27 +12,33 @@ const courseRouter = Router()
  *     Course:
  *       type: object
  *       required:
- *         - course_code
- *         - title
- *         - credits
- *         - department_id
- *         - plan_id
+ *         - courseNo
+ *         - coursesArabicName
+ *         - coursesCreditHours
  *       properties:
- *         course_code:
- *           type: string
- *         title:
- *           type: string
- *         credits:
+ *         courseNo:
  *           type: number
+ *         coursesArabicName:
+ *           type: string
+ *         coursesCreditHours:
+ *           type: number
+ *         courseLevel:
+ *           type: number
+ *         courseOrder:
+ *           type: number
+ *         courseSemester:
+ *           type: number
+ *           nullable: true
+ *         courseYear:
+ *           type: number
+ *           nullable: true
+ *         preCourse:
+ *           type: array
+ *           items:
+ *             type: number
+ *           default: []
  *         department_id:
  *           type: string
- *         diffeculty_level:
- *           type: string
- *           enum: [low, moderate, high]
- *         plan_id:
- *           type: string
- *         estimated:
- *           type: number
  */
 
 /**
@@ -92,6 +98,9 @@ courseRouter.get('/:id', courseController.getCourseById)
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Course'
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       201:
  *         description: Course created successfully
@@ -108,7 +117,7 @@ courseRouter.get('/:id', courseController.getCourseById)
  */
 courseRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(CourseSchema),
   courseController.createCourse,
@@ -127,6 +136,9 @@ courseRouter.post(
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -151,7 +163,7 @@ courseRouter.post(
  */
 courseRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(CourseSchema),
   courseController.updateCourse,
@@ -170,6 +182,9 @@ courseRouter.put(
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Course deleted successfully
@@ -182,7 +197,7 @@ courseRouter.put(
  */
 courseRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   courseController.deleteCourse,
 )

@@ -12,20 +12,41 @@ const userRouter = Router()
  *     CompletedCourse:
  *       type: object
  *       required:
- *         - course_id
- *         - course_name
+ *         - courseNo
  *         - grade
  *       properties:
- *         course_id:
+ *         courseNo:
+ *           type: number
+ *         courseArabicName:
  *           type: string
- *         course_name:
+ *         academicYear:
+ *           type: number
+ *         semesterNo:
+ *           type: number
+ *         creditHours:
  *           type: string
  *         grade:
+ *           type: string
+ *         weight:
+ *           type: string
+ *         caption:
+ *           type: string
+ *
+ *     Supervisor:
+ *       type: object
+ *       properties:
+ *         supervisorNo:
+ *           type: number
+ *         supervisorArabicName:
+ *           type: string
+ *         supervisorEmail:
  *           type: string
  *
  *     StudentData:
  *       type: object
  *       properties:
+ *         studentNo:
+ *           type: number
  *         completed_courses:
  *           type: array
  *           items:
@@ -37,6 +58,8 @@ const userRouter = Router()
  *           maximum: 100.0
  *         academic_plan:
  *           type: string
+ *         supervisor:
+ *           $ref: '#/components/schemas/Supervisor'
  *         notifications:
  *           type: array
  *           items:
@@ -71,6 +94,9 @@ const userRouter = Router()
  *     tags:
  *       - Users
  *     summary: Get all users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all users
@@ -85,7 +111,7 @@ const userRouter = Router()
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/', requireAuth, userController.getAllUsers)
+userRouter.get('/', requireAuth(), userController.getAllUsers)
 
 /**
  * @swagger
@@ -94,6 +120,9 @@ userRouter.get('/', requireAuth, userController.getAllUsers)
  *     tags:
  *       - Users
  *     summary: Get a user by email
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: email
@@ -117,7 +146,7 @@ userRouter.get('/', requireAuth, userController.getAllUsers)
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/search', requireAuth, userController.getUserByEmail)
+userRouter.get('/search', requireAuth(), userController.getUserByEmail)
 
 /**
  * @swagger
@@ -126,6 +155,9 @@ userRouter.get('/search', requireAuth, userController.getUserByEmail)
  *     tags:
  *       - Users
  *     summary: Get a user by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -146,7 +178,7 @@ userRouter.get('/search', requireAuth, userController.getUserByEmail)
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/:id', requireAuth, userController.getUserById)
+userRouter.get('/:id', requireAuth(), userController.getUserById)
 
 /**
  * @swagger
@@ -155,6 +187,9 @@ userRouter.get('/:id', requireAuth, userController.getUserById)
  *     tags:
  *       - Users
  *     summary: Create a new user
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -179,7 +214,7 @@ userRouter.get('/:id', requireAuth, userController.getUserById)
  */
 userRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(userSchema),
   userController.createUser,
@@ -192,6 +227,9 @@ userRouter.post(
  *     tags:
  *       - Users
  *     summary: Update a user by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -224,7 +262,7 @@ userRouter.post(
  */
 userRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(userSchema),
   userController.updateUser,
@@ -237,6 +275,9 @@ userRouter.put(
  *     tags:
  *       - Users
  *     summary: Delete a user by ID
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -257,7 +298,7 @@ userRouter.put(
  */
 userRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   userController.deleteUser,
 )
