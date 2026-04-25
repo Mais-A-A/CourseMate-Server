@@ -1358,7 +1358,8 @@ export const seed = async () => {
     },
     {
       rule_type: 'academic_load',
-      description: 'الحد الأدنى للتسجيل في الفصل الدراسي العادي هو 12 ساعة معتمدة.',
+      description:
+        'الحد الأدنى للتسجيل في الفصل الدراسي العادي هو 12 ساعة معتمدة.',
     },
     // Study Duration
     {
@@ -1390,8 +1391,7 @@ export const seed = async () => {
     // Withdrawal & Add/Drop
     {
       rule_type: 'withdrawal',
-      description:
-        'خلال الأسبوع الأول: يُسمح بالانسحاب دون خسارة الرسوم.',
+      description: 'خلال الأسبوع الأول: يُسمح بالانسحاب دون خسارة الرسوم.',
     },
     {
       rule_type: 'withdrawal',
@@ -1416,8 +1416,7 @@ export const seed = async () => {
     },
     {
       rule_type: 'deferral',
-      description:
-        'مدة التأجيل لا تُحتسب ضمن المدة القصوى للتخرج.',
+      description: 'مدة التأجيل لا تُحتسب ضمن المدة القصوى للتخرج.',
     },
     // Course Repetition
     {
@@ -1507,13 +1506,11 @@ export const seed = async () => {
     },
     {
       rule_type: 'graduation',
-      description:
-        'شروط التخرج: الحصول على معدل تراكمي لا يقل عن 65%.',
+      description: 'شروط التخرج: الحصول على معدل تراكمي لا يقل عن 65%.',
     },
     {
       rule_type: 'graduation',
-      description:
-        'شروط التخرج: الحصول على معدل تخصصي لا يقل عن 70%.',
+      description: 'شروط التخرج: الحصول على معدل تخصصي لا يقل عن 70%.',
     },
     {
       rule_type: 'graduation',
@@ -1551,7 +1548,7 @@ export const seed = async () => {
     {
       rule_type: 'tuition_refund',
       description:
-        'سياسة استرداد الرسوم للطلاب الجدد: قبل بدء الفصل لا يُسترد شيء، الأسبوع الأول 25%، الأسبوع الثاني 50%، بعد أسبوعين لا يُسترد شيء.',
+        'سياسة استرداد الرسوم للطلاب الجدد عند الانسحاب: قبل بدء الفصل تُحتجز 20% من القسط ورسوم التسجيل (يُسترد 80%)، في الأسبوع الأول تُحتجز 25% من القسط ورسوم التسجيل، في الأسبوع الثاني تُحتجز 50% من القسط ورسوم التسجيل، بعد أسبوعين لا يُسترد شيء.',
     },
     // Semester structure
     {
@@ -1565,139 +1562,58 @@ export const seed = async () => {
       description:
         'يُمنح الطالب أسبوعين إضافيين بعد امتحانات الفصل لإنهاء مشروع التخرج. المشروع غير المكتمل يُعطى "W" إذا كانت النواقص قابلة للإصلاح في الفصل التالي.',
     },
-  ])
-
-  // ─── Academic Warnings (from registrationinfo/academicInfo) ────────────────
-  await AcademicWarningModel.create([
+    // Student Classification by Credit Hours
     {
-      user_id: student._id,
-      caption: 'آخر فصل دراسي مفروز:',
-      value: 'الصيفي 2024/2025',
-      textColour: 'primary',
-      orderNo: 1,
+      rule_type: 'student_classification',
+      description:
+        'تصنيف الطالب حسب الساعات المعتمدة المنجزة: حتى 33 ساعة = السنة الأولى، 34-67 ساعة = السنة الثانية، 68-101 ساعة = السنة الثالثة، 102-135 ساعة = السنة الرابعة، 136 ساعة فأكثر = السنة الخامسة.',
+    },
+    // Grade Review
+    {
+      rule_type: 'grade_review',
+      description:
+        'يحق للطالب طلب مراجعة علامته خلال ثلاثة أيام من تاريخ إعلان النتائج النهائية بعد دفع رسوم المراجعة.',
+    },
+    // Substitute Course
+    {
+      rule_type: 'substitute_course',
+      description:
+        'يُقدَّم مساق بديل مرة واحدة إذا كان مساق واحد فقط يمنع الطالب من التخرج ولم يُطرح في ذلك الفصل، أو إذا كان المساق المطروح يتعارض مع مساق إلزامي آخر. يوافق العميد على البديل بعد استشارة رئيس القسم.',
+    },
+    // Academic Dismissal – Extended Causes (7–11)
+    {
+      rule_type: 'academic_dismissal',
+      description:
+        'الطالب المفصول لا يحق له الاستمرار في نفس الكلية؛ يجوز له الانتقال إلى كلية أخرى إذا توافرت شروط القبول.',
     },
     {
-      user_id: student._id,
-      caption: 'الوضع الاكاديمي:',
-      value: 'منتظم',
-      textColour: 'primary',
-      orderNo: 2,
+      rule_type: 'academic_dismissal',
+      description:
+        'الطالب المفصول بسبب تدني المعدل التخصصي (مع معدل تراكمي 65% فأكثر) يجوز له الانتقال إلى تخصص آخر مرة واحدة فقط إذا استوفى شروط القبول الأصلية.',
     },
     {
-      user_id: student._id,
-      caption: 'التحذيرات الأكاديمية:',
-      value: '0',
-      textColour: 'primary',
-      orderNo: 4,
+      rule_type: 'academic_dismissal',
+      description:
+        'الطالب المفصول في الفصل الأول (معدل أقل من 55%) يجوز له طلب الاستمرار كـ"مفصول مؤقت" بموافقة العميد العام، بشرط تحقيق معدل تراكمي 65% فأكثر بنهاية الفصل. الفشل يعني الفصل النهائي من الكلية. تُمنح هذه الفرصة مرة واحدة فقط.',
     },
     {
-      user_id: student._id,
-      caption: 'معدل الفصل الأخير:',
-      value: '96.3',
-      textColour: 'primary',
-      orderNo: 5,
+      rule_type: 'academic_dismissal',
+      description:
+        'طلاب برنامج الجسر المفصولون يجوز لهم الانتقال إلى تخصص آخر مرة واحدة؛ ويُعدّون قد استنفدوا فرصة الفصل المؤقت.',
     },
     {
-      user_id: student._id,
-      caption: 'المعدل التخصصي:',
-      value: '95.5',
-      textColour: 'primary',
-      orderNo: 6,
+      rule_type: 'academic_dismissal',
+      description:
+        'الفصل من تخصص ثالث بعد الفصل من تخصصين سابقين يعني الفصل النهائي من الجامعة.',
     },
+    // Parallel System
     {
-      user_id: student._id,
-      caption: 'المعدل التراكمي:',
-      value: '95.8',
-      textColour: 'primary',
-      orderNo: 7,
-    },
-    {
-      user_id: student._id,
-      caption: 'الساعات المسجلة:',
-      value: '101',
-      textColour: 'primary',
-      orderNo: 8,
-    },
-    {
-      user_id: student._id,
-      caption: 'الساعات المقطوعة بنجاح:',
-      value: '101',
-      textColour: 'primary',
-      orderNo: 9,
-    },
-    {
-      user_id: student._id,
-      caption: 'المستوى بالفصول:',
-      value: '6',
-      textColour: 'primary',
-      orderNo: 10,
-    },
-    {
-      user_id: student._id,
-      caption: 'التخصص:',
-      value: 'علم الحاسوب',
-      textColour: 'primary',
-      orderNo: 11,
-    },
-    {
-      user_id: student._id,
-      caption: 'الدرجة العلمية:',
-      value: 'البكالوريوس',
-      textColour: 'primary',
-      orderNo: 3,
-    },
-    {
-      user_id: student._id,
-      caption: 'سنة قانون التسجيل:',
-      value: '2023',
-      textColour: 'primary',
-      orderNo: 14,
-    },
-    {
-      user_id: student._id,
-      caption: 'سنة خطة التخرج:',
-      value: '2022',
-      textColour: 'primary',
-      orderNo: 15,
-    },
-    {
-      user_id: student._id,
-      caption: 'الإنتظام:',
-      value: 'منتظم',
-      textColour: 'primary',
-      orderNo: 21,
-    },
-    {
-      user_id: student._id,
-      caption: 'تخصص التوجيهي:',
-      value: 'علمي',
-      textColour: 'primary',
-      orderNo: 17,
-    },
-    {
-      user_id: student._id,
-      caption: 'معدل التوجيهي:',
-      value: '92.6',
-      textColour: 'primary',
-      orderNo: 18,
-    },
-    {
-      user_id: student._id,
-      caption: 'مجموعة الطالب:',
-      value: 'A',
-      textColour: 'primary',
-      orderNo: 20,
-    },
-    {
-      user_id: student._id,
-      caption: 'المشرف الأكاديمي:',
-      value: 'محمد جواد عطا الجعبري  jabary980@ppu.edu',
-      textColour: 'primary',
-      orderNo: 22,
+      rule_type: 'parallel_system',
+      description:
+        'يُقبل طلاب التعليم الموازي وفق حد أدنى للمعدل التنافسي يُحدده مجلس العمداء سنوياً. الطلاب الذين يحققون معدلاً فصلياً 85% فأكثر مع اجتياز 15 ساعة كحد أدنى يدفعون رسوم الانتظام في الفصل التالي فقط. تسري عليهم جميع الأنظمة الأكاديمية كطلاب الانتظام.',
     },
   ])
 
-  // ─── Semester History (from registrationinfo/semesters) ────────────────────
   await ScheduleModel.create([
     {
       student_id: student._id,

@@ -1,8 +1,7 @@
 import { geminiModel } from '../config/gemini.js'
-import { fetchUserContext } from './context.fetcher.js'
-import type { Types } from 'mongoose'
+import { fetchContext as fetchUserContext } from './context.fetcher.js'
 import type { BaseMessage } from '@langchain/core/messages'
-import { HumanMessage } from '@langchain/core/messages'
+import { HumanMessage, AIMessage } from '@langchain/core/messages'
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -22,7 +21,6 @@ const sessions = new Map<string, SessionState>()
 
 const SESSION_TTL_MS = 30 * 60 * 1000
 
-// To be discussed:
 const CLEANUP_INTERVAL_MS = 10 * 60 * 1000
 
 const cleanupTimer = setInterval(() => {
@@ -138,4 +136,63 @@ export function clearSession(sessionId: string): void {
 
 export function getActiveSessionCount(): number {
   return sessions.size
+}
+export async function* getAdvisorResponseStream(
+  sessionId: string,
+  userId: string,
+  message: string,
+): AsyncGenerator<string> {
+  if (!sessions.has(sessionId)) {
+    let studentContext: string
+
+    try {
+      studentContext = await fetchUserContext(userId)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to load student context: ${msg}`)
+    }
+
+    sessions.set(sessionId, {
+      history: [],
+      studentContext,
+      lastUsed: Date.now(),
+    })
+  }
+
+  const session = sessions.get(sessionId)!
+  session.lastUsed = Date.now()
+
+  const prompt = ChatPromptTemplate.fromMessages([
+    [
+      'system',
+      SYSTEM_PROMPT.replace('{studentContext}', session.studentContext),
+    ],
+    new MessagesPlaceholder('history'),
+    ['human', '{input}'],
+  ])
+
+  const messages = await prompt.formatMessages({
+    history: session.history,
+    input: message,
+  })
+
+  let fullResponse = ''
+  try {
+    let stream = await geminiModel.stream(messages)
+
+    for await (const chunk of stream) {
+      const content = parseModelResponseContent(chunk.content)
+      if (content) {
+        fullResponse += content
+        yield content
+      }
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error'
+    throw new Error(`AI model error: ${msg}`)
+  }
+  if (!fullResponse) {
+    throw new Error('AI model returned an empty response')
+  }
+  session.history.push(new HumanMessage(message), new AIMessage(fullResponse))
 }
