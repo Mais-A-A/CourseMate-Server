@@ -6,7 +6,7 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from '@langchain/core/prompts'
-
+import { parseModelResponseContent } from '../shared/utils/AIUtils.js'
 const SYSTEM_PROMPT = `You are an academic advisor for a university student management system called CourseMate For Palestine Polytechnic University.
 You have access to the student's academic data below. Think step-by-step to ensure accuracy. Answer in the same language the student uses. This is very important so that it may affect the student's academic journey. Always be concise, helpful, and reference the student's actual data when relevant. If you don't know the answer, say you don't know. Never make up information. Always be honest and transparent about what you can and cannot do.
 {studentContext}`
@@ -42,34 +42,6 @@ const cleanupTimer = setInterval(() => {
 }, CLEANUP_INTERVAL_MS)
 
 cleanupTimer.unref()
-
-function parseModelResponseContent(content: unknown): string {
-  if (typeof content === 'string') {
-    return content
-  }
-
-  if (Array.isArray(content)) {
-    const text = content
-      .map((part) => {
-        if (typeof part === 'string') return part
-        if (
-          typeof part === 'object' &&
-          part !== null &&
-          'text' in part &&
-          typeof (part as { text?: unknown }).text === 'string'
-        ) {
-          return (part as { text: string }).text
-        }
-        return ''
-      })
-      .join('')
-      .trim()
-
-    return text || 'I could not generate a response.'
-  }
-
-  return 'I could not generate a response.'
-}
 
 export async function getAdvisorResponse(
   sessionId: string,

@@ -76,11 +76,14 @@ export function classifyCourseByElegibility(
   const ineligibleCourses = new Map<string, unknown>()
 
   remainingCourses.forEach((courseInfo, courseName) => {
-    const preCourse = (courseInfo as any).preCourse
-    if (
+    const preCourse = (courseInfo as any).preCourse as string[]
+
+    const isEligible =
       !preCourse ||
-      preCourse.every((pre: string) => !remainingCourses.has(pre))
-    ) {
+      preCourse.length === 0 ||
+      preCourse.every((pre) => !remainingCourses.has(pre))
+
+    if (isEligible) {
       eligibleCourses.set(courseName, courseInfo)
     } else {
       ineligibleCourses.set(courseName, courseInfo)
