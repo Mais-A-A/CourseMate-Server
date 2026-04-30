@@ -12,7 +12,8 @@
     "test:integration": "cross-env NODE_ENV=test USE_REAL=true vitest",
     "test:watch": "cross-env NODE_ENV=test vitest --watch",
     "test:ui": "cross-env NODE_ENV=test  vitest --ui",
-    "coverage": "cross-env NODE_ENV=test vitest run --coverage"
+    "coverage": "cross-env NODE_ENV=test vitest run --coverage",
+    "context:dump": "cross-env NODE_ENV=development node dist/src/ai/context.fetcher.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
   "dependencies": {
     "@langchain/core": "^1.1.39",
     "@langchain/google-genai": "^2.1.26",
+    "@types/cors": "^2.8.19",
     "@types/morgan": "^1.9.10",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

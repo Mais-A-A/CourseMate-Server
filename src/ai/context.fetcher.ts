@@ -1,49 +1,310 @@
-import { Types } from 'mongoose'
 import { User } from '../models/user.model.js'
+import { type User as UserSchemaType } from '../schemas/user.schemas.js'
 import { AcademicWarning } from '../models/academicWarning.model.js'
+import { type AcademicWarning as AcademicWarningType } from '../schemas/academicWarning.schema.js'
 import { AcademicRule } from '../models/academicRule.model.js'
+import { type AcademicRule as AcademicRuleType } from '../schemas/academicRule.schema.js'
+import { CourseSection } from '../models/courseSection.model.js'
+import { type CourseSection as CourseSectionType } from '../schemas/courseSection.schema.js'
+import { Schedule } from '../models/schedule.model.js'
+import { type Schedule as ScheduleType } from '../schemas/schedule.schema.js'
+import AcademicPlan from '../models/academicPlan.model.js'
+import { type AcademicPlan as AcademicPlanType } from '../schemas/academicPlan.schema.js'
+import { connectDatabase } from '../config/db.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import mongoose from 'mongoose'
 
+type UserWithId = UserSchemaType & { _id?: unknown }
 
-export async function fetchUserContext(userId: string) {
-  const warningFilter: Record<string, unknown> = {}
-  let user
-  try {
-    const studentNo = Number(userId)
-    user = await User.findOne({ 'student_data.studentNo': studentNo }).lean()
+async function fetchUser(userId: string): Promise<UserWithId | null> {
+  return User.findOne({
+    email: `${userId}@ppu.edu`,
+  }).lean() as Promise<UserWithId | null>
+}
 
-    if (user?._id) {
-      warningFilter.user_id = user._id
-    } else {
-      console.warn(`[ContextFetcher] No user found for ID ${userId}`)
-    }
-  } catch (error) {
-    console.error(
-      `[AdvisorService] Error fetching user context for ${userId}:`,
-      error,
+async function fetchAcademicPlan(
+  planId: string,
+): Promise<AcademicPlanType | null> {
+  return AcademicPlan.findById(
+    planId,
+  ).lean() as Promise<AcademicPlanType | null>
+}
+
+function extractCoursesFromAcademicPlan(academicPlan: AcademicPlanType) {
+  const completedCourses = new Map<string, unknown>()
+  const remainingCourses = new Map<string, unknown>()
+
+  academicPlan.groups.forEach((group) => {
+    const groupCourses = new Map<string, unknown>()
+    groupCourses.set(
+      group.groupArabicName!,
+      group.groupCoursList.map((course) => {
+        const courseInfo = {
+          courseNo: course.courseNo,
+          coursesArabicName: course.coursesArabicName,
+          coursesCreditHours: course.coursesCreditHours,
+          courseLevel: course.courseLevel,
+          courseSemester: course.courseSemester,
+          courseYear: course.courseYear,
+          creditHours: course.coursesCreditHours,
+          preCourse: course.preCourse,
+          grade:
+            course.courseGrades[course.courseGrades.length - 1]?.gradeNGrade &&
+            course.courseGrades[course.courseGrades.length - 1]
+              ?.gradeResultGrade !== 'F'
+              ? course.courseGrades[course.courseGrades.length - 1]?.gradeNGrade
+              : null,
+        }
+        if (course.courseGrades.length > 0) {
+          completedCourses.set(course.coursesArabicName!, courseInfo)
+        } else {
+          remainingCourses.set(course?.courseNo?.toString()!, courseInfo)
+        }
+        return courseInfo
+      }),
     )
-    return 'I could not retrieve your profile information.'
-  }
-  const [warnings, rules] = await Promise.all([
-    AcademicWarning.find(warningFilter as any).lean(),
-    AcademicRule.find().lean(),
-  ])
+  })
+  return { completedCourses, remainingCourses }
+}
 
-  const completedCourses = user?.student_data?.completed_courses ?? []
+export function classifyCourseByElegibility(
+  remainingCourses: Map<string, unknown>,
+) {
+  const eligibleCourses = new Map<string, unknown>()
+  const ineligibleCourses = new Map<string, unknown>()
+
+  remainingCourses.forEach((courseInfo, courseName) => {
+    const preCourse = (courseInfo as any).preCourse
+    if (
+      !preCourse ||
+      preCourse.every((pre: string) => !remainingCourses.has(pre))
+    ) {
+      eligibleCourses.set(courseName, courseInfo)
+    } else {
+      ineligibleCourses.set(courseName, courseInfo)
+    }
+  })
+
+  return { eligibleCourses, ineligibleCourses }
+}
+
+const fetchSchedule = async (userId: string): Promise<ScheduleType[]> => {
+  const schedules = await Schedule.find({
+    studentNo: userId,
+  }).lean()
+  return schedules as unknown as ScheduleType[]
+}
+
+const fetchAcademicWarnings = async (
+  userId: string,
+): Promise<AcademicWarningType[]> => {
+  const academicWarnings = (await AcademicWarning.find({
+    user_id: userId,
+  }).lean()) as unknown as AcademicWarningType[]
+  if (!academicWarnings) {
+    return []
+  }
+  return academicWarnings
+}
+function fetchAcademicRules(): Promise<AcademicRuleType[]> {
+  return AcademicRule.find().lean() as Promise<AcademicRuleType[]>
+}
+/*
+To be discussed: whether to fetch all course sections or only the ones relevant to the student (e.g., based on their major or completed courses). For now, we will fetch all sections for the IT and CS college.
+function fetchCourseSections(
+  collegeName = 'تكنولوجيا المعلومات وهندسة الحاسوب',
+): Promise<CourseSectionType[]> {
+  return CourseSection.find({
+    collageArabicName: collegeName,
+  }).lean() as Promise<CourseSectionType[]>
+}
+*/
+export async function fetchContext(userId: string) {
+  await connectDatabase()
+  const user = await fetchUser(userId)
+  if (!user) {
+    throw new Error('User not found')
+  }
+  const academicPlan = await fetchAcademicPlan(
+    user.student_data?.academic_plan ?? '',
+  )
+  if (!academicPlan) {
+    throw new Error('Academic plan not found')
+  }
+  const { completedCourses, remainingCourses } =
+    extractCoursesFromAcademicPlan(academicPlan)
+  const { eligibleCourses, ineligibleCourses } =
+    classifyCourseByElegibility(remainingCourses)
+
+  const schedule = await fetchSchedule(userId)
+  const warningUserId =
+    user._id !== undefined && user._id !== null ? String(user._id) : userId
+  const academicWarnings = await fetchAcademicWarnings(warningUserId)
+
+  const completedCoursesText = [...completedCourses.entries()]
+    .map(([courseName, courseInfo]) => {
+      const c = courseInfo as any
+      const sem = c.courseSemester != null ? `Sem ${c.courseSemester}` : null
+      const yr = c.courseYear != null ? `Year ${c.courseYear}` : null
+      const when = [yr, sem].filter(Boolean).join(', ')
+      return `- ${courseName} (Grade: ${c.grade ?? 'N/A'}${when ? `, ${when}` : ''})`
+    })
+    .join('\n')
+
+  const eligibleCoursesText = [...eligibleCourses.entries()]
+    .map(([courseName, courseInfo]) => {
+      const c = courseInfo as any
+      const sem = c.courseSemester != null ? `Sem ${c.courseSemester}` : null
+      const yr = c.courseYear != null ? `Year ${c.courseYear}` : null
+      const when = [yr, sem].filter(Boolean).join(', ')
+      return `- ${courseName}${when ? ` (${when})` : ''}`
+    })
+    .join('\n')
+
+  const ineligibleCoursesText = [...ineligibleCourses.entries()]
+    .map(([courseName, courseInfo]) => {
+      const c = courseInfo as any
+      const sem = c.courseSemester != null ? `Sem ${c.courseSemester}` : null
+      const yr = c.courseYear != null ? `Year ${c.courseYear}` : null
+      const when = [yr, sem].filter(Boolean).join(', ')
+      return `- ${courseName}${when ? ` (${when})` : ''}`
+    })
+    .join('\n')
+
+  const scheduleText = schedule
+    .map(
+      (s) =>
+        `- Academic Year: ${s.academicYear} | ${s.academicYearTitle ?? 'N/A'} | Semester: ${s.semesterNo} (${s.semesterTitle ?? 'N/A'}) | Hours: ${s.semesterHours ?? 'N/A'} | Passed: ${s.passHours ?? 'N/A'} | Semester Avg: ${s.semesterAverage ?? 'N/A'} | Major Avg: ${s.majorAverage ?? 'N/A'} | Cumulative: ${s.accumulativeAverage ?? 'N/A'} | Warning: ${s.academicWarning ?? 'N/A'} | Status: ${s.academicStatus ?? 'N/A'}`,
+    )
+    .join('\n')
+
+  const academicWarningsText = academicWarnings
+    .map(
+      (w) =>
+        `- ${w.caption}: ${w.value} (Type: ${w.warning_type ?? 'N/A'}, Resolved: ${w.is_resolved ? 'Yes' : 'No'})`,
+    )
+    .join('\n')
+
+  const academicRulesText = await fetchAcademicRules().then((rules) =>
+    rules.map((r) => `- ${r.rule_type}: ${r.description}`).join('\n'),
+  )
+  /*
+  const courseSections = await fetchCourseSections()
+
+  const courseSectionsText = courseSections
+    .map(
+      (cs) =>
+        `- ${cs.courseName} (Course No: ${cs.courseNo}, Section: ${cs.sectionNo}, Time: ${cs.secTime ?? 'N/A'}, Room: ${cs.roomName ?? 'N/A'}, Supervisor: ${cs.supervisorName ?? 'N/A'}, Capacity: ${cs.capacity ?? 'N/A'}, Enrolled: ${cs.counter ?? 'N/A'}, Open: ${cs.isOpen ? 'Yes' : 'No'})`,
+    )
+    .join('\n')
+
+    */
+
+  const levelsText = (academicPlan.levels ?? [])
+    .map((level) => {
+      const header = `### ${level.groupArabicName ?? `Level ${level.id}`}${level.requiredHours != null ? ` (${level.requiredHours} hrs)` : ''}`
+      const courses = (level.groupCoursList ?? [])
+        .map((c) => {
+          const grade = c.courseGrades?.length
+            ? ` | Grade: ${c.courseGrades[c.courseGrades.length - 1]?.gradeCGrade ?? 'N/A'}`
+            : ''
+          return `  - ${c.coursesArabicName} (No: ${c.courseNo}, ${c.coursesCreditHours} hrs${grade})`
+        })
+        .join('\n')
+      return `${header}\n${courses}`
+    })
+    .join('\n\n')
 
   return `
-## Student Profile
-Name: ${user?.name ?? 'Unknown'}
-GPA: ${user?.student_data?.gpa ?? 'N/A'}
-Completed Courses: ${
-    completedCourses
-      .map((c: any) => c.courseArabicName || `Course ${c.courseNo}`)
-      .join(', ') || 'None'
-  }
+Student Profile:
 
-## Academic Warnings (${warnings.length})
-${warnings.map((w: any) => `- ${w.caption}: ${w.value}`).join('\n') || 'None'}
+## Main Information
+
+- Name: ${user.name}
+- Email: ${user.email}
+- GPA: ${user.student_data?.gpa ?? 'N/A'}
+- Supervisor: ${user.student_data?.supervisor?.supervisorArabicName ?? 'N/A'}
+- Supervisor Email: ${user.student_data?.supervisor?.supervisorEmail ?? 'N/A'}
+
+## Academic Plan
+
+- Academic Plan Year: ${academicPlan.planYear ?? 'N/A'}
+- Academic Plan for major: ${academicPlan.majorArabicName ?? 'N/A'}
+
+## Completed Courses
+
+${completedCoursesText || 'None'}
+
+## Eligible Courses for Next Semester
+
+${eligibleCoursesText || 'None'}
+
+## Ineligible Courses for Next Semester
+
+${ineligibleCoursesText || 'None'}
+
+## Course Distribution by Semester (توزيع المساقات على الفصول)
+
+${levelsText || 'None'}
+
+## Schedule
+
+${scheduleText || 'None'}
+
+## Academic Warnings
+
+${academicWarningsText || 'None'}
 
 ## Academic Rules
-${rules.map((r: any) => `- ${r.rule_type}: ${r.description}`).join('\n') || 'None'}
-  `.trim()
+
+${academicRulesText || 'None'}
+
+
+
+`.trim()
 }
+
+export async function dumpContextToFile(
+  userId: string,
+  outputPath = `context_${userId}.txt`,
+): Promise<string> {
+  const context = await fetchContext(userId)
+  const resolvedPath = path.resolve(outputPath)
+  await fs.promises.writeFile(resolvedPath, context, 'utf8')
+  return resolvedPath
+}
+
+const isExecutedDirectly =
+  process.argv[1] !== undefined &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+
+if (isExecutedDirectly) {
+  const userId = process.argv[2]
+  const outputPath = process.argv[3]
+
+  if (!userId) {
+    console.error(
+      'Usage: node dist/src/ai/context.fetcher.js <userId> [outputFilePath]',
+    )
+    process.exit(1)
+  }
+
+  dumpContextToFile(userId, outputPath)
+    .then(async (savedPath) => {
+      console.log(`Context written to: ${savedPath}`)
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect()
+      }
+    })
+    .catch(async (error) => {
+      console.error('Error dumping context:', error)
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect()
+      }
+      process.exit(1)
+    })
+}
+
+export default fetchContext

@@ -15,8 +15,20 @@ import { departmentRouter } from './src/routes/department.routes.js'
 import { scheduleRouter } from './src/routes/schedule.routes.js'
 import aiRoutes from './src/routes/ai.route.js'
 import morgan from 'morgan'
+import cors from 'cors'
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5500',
+  'https://coursemate-frontend.vercel.app',
+]
 const app = express()
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+)
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
