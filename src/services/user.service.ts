@@ -17,11 +17,11 @@ class UserService {
   }
 
   async getUserByEmail(email: string) {
-    return await User.findOne({ email }).lean()
+    return await User.findOne({ email }).select('-password').lean()
   }
 
   async getUserById(id: string) {
-    return await User.findById(id).lean()
+    return await User.findById(id).select('-password').lean()
   }
 
   async updateUser(id: string, updateData: Partial<UserType>) {
