@@ -29,7 +29,7 @@ export function detectRole(email: string): UserRole {
     }
     return 'supervisor'
   }
-  process.exit(1)
+  throw new Error(`Non-university email cannot be assigned a role: ${email}`)
 }
 
 export function extractStudentId(email: string): string | null {
@@ -61,6 +61,7 @@ export async function verifyJWT(token: string): Promise<UniversityUser | null> {
     return decoded
   } catch (err) {
     console.error('JWT verification failed:', err)
+    
     return null
   }
 }

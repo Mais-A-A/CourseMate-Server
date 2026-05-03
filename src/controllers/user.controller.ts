@@ -25,7 +25,10 @@ class UserController {
   }
   async getUserByEmail(req: Request, res: Response) {
     try {
-      const email = req.query.email as string
+      const email = req.query.email
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ message: 'Email query parameter is required' })
+      }
       const user = await userService.getUserByEmail(email)
       if (!user) {
         return res.status(404).json({ message: 'User not found' })

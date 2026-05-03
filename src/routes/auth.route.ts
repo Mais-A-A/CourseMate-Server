@@ -95,12 +95,13 @@ authRouter.post('/logout', requireAuth(), (req: Request, res: Response) => {
  *       401:
  *         description: Unauthorized or expired session
  */
-authRouter.get('/me', (req: Request, res: Response) => {
+authRouter.get('/me', async (req: Request, res: Response) => {
   const token = req.cookies.token
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' })
   }
-  const user = verifyJWT(token)
+  const user = await verifyJWT(token)
+  console.log('Decoded user from token:', user)
   if (!user) {
     res.clearCookie('token')
     return res

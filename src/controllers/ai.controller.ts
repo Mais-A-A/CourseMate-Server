@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express'
 import { getAdvisorResponseStream } from '../ai/advisor.service.js'
-import { jwtDecode } from 'jwt-decode'
-import type { UniversityUser } from '../shared/utils/authUtils.js'
+import { verifyJWT } from '../shared/utils/authUtils.js'
 export async function chat(req: Request, res: Response) {
   const token = req.headers.authorization?.startsWith('Bearer ')
     ? req.headers.authorization.split(' ')[1]
@@ -10,12 +9,8 @@ export async function chat(req: Request, res: Response) {
   let studentId = req.currentUser?.studentId ?? null
 
   if (!studentId && token) {
-    try {
-      const decodedToken = jwtDecode<UniversityUser>(token)
-      studentId = decodedToken.studentId
-    } catch {
-      studentId = null
-    }
+    const verified = await verifyJWT(token)
+    studentId = verified?.studentId ?? null
   }
 
   if (!studentId) {
