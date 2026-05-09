@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import type { Request, Response, NextFunction } from 'express'
 import { importantDatesController } from '../controllers/importantDates.controller.js'
 import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
 import { validateRequest } from '../middlewares/validation.js'
@@ -71,16 +70,38 @@ const importantDatesRouter = Router()
  */
 importantDatesRouter.get(
   '/',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const importantDates =
-        await importantDatesController.getAllImportantDates(req, res)
-      res.json(importantDates)
-    } catch (error) {
-      next(error)
-    }
-  },
+  requireAuth(),
+  importantDatesController.getAllImportantDates,
+)
+
+/**
+ * @swagger
+ * /important-dates/upcoming:
+ *   get:
+ *     tags:
+ *       - Important Dates
+ *     summary: Get upcoming important dates
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of upcoming important dates
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ImportantDate'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+importantDatesRouter.get(
+  '/upcoming',
+  requireAuth(),
+  importantDatesController.getUpcomingImportantDates,
 )
 
 /**
@@ -117,54 +138,8 @@ importantDatesRouter.get(
  */
 importantDatesRouter.get(
   '/type/:type',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const importantDates =
-        await importantDatesController.getImportantDatesByType(req, res)
-      res.json(importantDates)
-    } catch (error) {
-      next(error)
-    }
-  },
-)
-
-/**
- * @swagger
- * /important-dates/upcoming:
- *   get:
- *     tags:
- *       - Important Dates
- *     summary: Get upcoming important dates
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of upcoming important dates
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/ImportantDate'
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-importantDatesRouter.get(
-  '/upcoming',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const upcomingImportantDates =
-        await importantDatesController.getUpcomingImportantDates(req, res)
-      res.json(upcomingImportantDates)
-    } catch (error) {
-      next(error)
-    }
-  },
+  requireAuth(),
+  importantDatesController.getImportantDatesByType,
 )
 
 /**
@@ -200,21 +175,8 @@ importantDatesRouter.get(
  */
 importantDatesRouter.get(
   '/:id',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const importantDate = await importantDatesController.getImportantDateById(
-        req,
-        res,
-      )
-      if (!importantDate) {
-        return res.status(404).json({ error: 'Important date not found' })
-      }
-      res.json(importantDate)
-    } catch (error) {
-      next(error)
-    }
-  },
+  requireAuth(),
+  importantDatesController.getImportantDateById,
 )
 
 /**
@@ -270,18 +232,10 @@ importantDatesRouter.get(
  */
 importantDatesRouter.post(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(importantDatesSchema),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const newImportantDate =
-        await importantDatesController.createImportantDate(req, res)
-      res.status(201).json(newImportantDate)
-    } catch (error) {
-      next(error)
-    }
-  },
+  importantDatesController.createImportantDate,
 )
 
 /**
@@ -338,18 +292,10 @@ importantDatesRouter.post(
  */
 importantDatesRouter.put(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
   validateRequest(importantDatesSchema),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const updatedImportantDate =
-        await importantDatesController.updateImportantDate(req, res)
-      res.json(updatedImportantDate)
-    } catch (error) {
-      next(error)
-    }
-  },
+  importantDatesController.updateImportantDate,
 )
 
 /**
@@ -383,17 +329,9 @@ importantDatesRouter.put(
  */
 importantDatesRouter.delete(
   '/:id',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
-  validateRequest(importantDatesSchema),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await importantDatesController.deleteImportantDate(req, res)
-      res.status(204).send()
-    } catch (error) {
-      next(error)
-    }
-  },
+  importantDatesController.deleteImportantDate,
 )
 
 /**
@@ -418,16 +356,10 @@ importantDatesRouter.delete(
  */
 importantDatesRouter.delete(
   '/',
-  requireAuth,
+  requireAuth(),
   requireRole('admin'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await importantDatesController.deleteAllImportantDates(req, res)
-      res.status(204).send()
-    } catch (error) {
-      next(error)
-    }
-  },
+  importantDatesController.deleteAllImportantDates,
 )
+
 export { importantDatesRouter }
 export default importantDatesRouter

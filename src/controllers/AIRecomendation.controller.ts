@@ -13,7 +13,7 @@ class AIRecomendationController {
     }
   }
 
-  async getAIRecomendations(req: Request, res: Response) {
+  async getAIRecomendations(_req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.getAllAIRecomendations()
       res.json(data)
@@ -25,7 +25,7 @@ class AIRecomendationController {
   async getAIRecomendationById(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.getAIRecomendationById(
-        req.params.id as string as string as string,
+        req.params.id,
       )
 
       if (!data) {
@@ -41,7 +41,7 @@ class AIRecomendationController {
   async updateAIRecomendation(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.updateAIRecomendation(
-        req.params.id as string as string,
+        req.params.id,
         req.body,
       )
 
@@ -58,7 +58,7 @@ class AIRecomendationController {
   async deleteAIRecomendation(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.deleteAIRecomendation(
-        req.params.id as string as string,
+        req.params.id,
       )
 
       if (!data) {
