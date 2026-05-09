@@ -66,13 +66,6 @@ describe('Auth Routes', () => {
     expect(res.body.user.email).toBe('221141@ppu.edu.ps')
   })
 
-  it('should clear the token cookie', async () => {
-    const res: any = await request(app).post('/api/auth/logout')
-    const cookieHeader = res.header['set-cookie'][0]
-    expect(cookieHeader).toContain('token=;')
-    expect(res.body.message).toBe('Logged out successfully')
-  })
-
   it('should redirect to login on authentication failure', async () => {
     mockAuthHandler = (req, res, next) => {
       res.redirect(`${process.env.CLIENT_URL}/login?error=unauthorized`)

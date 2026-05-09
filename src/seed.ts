@@ -12,7 +12,7 @@ import AcademicRule from './models/academicRule.model.js'
 import AcademicWarning from './models/academicWarning.model.js'
 import Schedule from './models/schedule.model.js'
 import AIRecomendation from './models/AIRecomendation.model.js'
-
+import importantDates from './models/importantDates.model.js'
 export const seed = async () => {
   await connectDatabase()
 
@@ -22,6 +22,7 @@ export const seed = async () => {
   const CourseSectionModel = CourseSection as any
   const UserModel = User as any
   const NotificationModel = Notification as any
+  const ImportantDatesModel = importantDates as any
   const AcademicRuleModel = AcademicRule as any
   const AcademicWarningModel = AcademicWarning as any
   const ScheduleModel = Schedule as any
@@ -1780,6 +1781,30 @@ export const seed = async () => {
     )
   }
 
+  const importantDates = [
+    {
+      title: 'بداية الفصل الدراسي الثاني 2026',
+      date: new Date('2026-02-01'),
+      description: 'يبدأ الفصل الدراسي الثاني للعام الأكاديمي 2025/2026.',
+    },
+    {
+      title: 'نهاية فترة إضافة/حذف المساقات',
+      date: new Date('2025-02-07'),
+      description: 'تنتهي فترة إضافة/حذف المساقات للعام الأكاديمي 2025/2026.',
+    },
+    {
+      title: 'بداية الامتحانات النهائية للفصل الثاني  2026',
+      date: new Date('2026-05-21'),
+      description:
+        'يبدأ الامتحانات النهائية للفصل الدراسي الثاني للعام الأكاديمي 2025/2026.',
+    },
+    {
+      title: 'نهاية الفصل الدراسي الثاني 2026',
+      date: new Date('2026-06-12'),
+      description: 'تنتهي الفصل الدراسي الثاني للعام الأكاديمي 2025/2026.',
+    },
+  ]
+  await ImportantDatesModel.create(importantDates)
   console.log('Database seeded successfully')
 }
 

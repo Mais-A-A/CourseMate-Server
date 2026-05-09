@@ -37,6 +37,7 @@ const options = {
       { name: 'Course Sections', description: 'Course section management' },
       { name: 'Schedules', description: 'Schedule management' },
       { name: 'Academic Plans', description: 'Academic plan management' },
+      { name: 'Important Dates', description: 'Important dates management' },
       { name: 'Notifications', description: 'Notification management' },
       { name: 'Academic Warnings', description: 'Academic warning management' },
       { name: 'Academic Rules', description: 'Academic rule management' },

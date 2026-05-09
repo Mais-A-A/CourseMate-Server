@@ -13,6 +13,7 @@ import { courseRouter } from './src/routes/course.routes.js'
 import { courseSectionRouter } from './src/routes/courseSection.routes.js'
 import { departmentRouter } from './src/routes/department.routes.js'
 import { scheduleRouter } from './src/routes/schedule.routes.js'
+import { importantDatesRouter } from './src/routes/importantDates.routes.js'
 import aiRoutes from './src/routes/ai.route.js'
 import morgan from 'morgan'
 import cors from 'cors'
@@ -45,6 +46,7 @@ app.use('/notification', notificationRouter)
 app.use('/academic-warning', academicWarningRouter)
 app.use('/academic-rule', academicRuleRouter)
 app.use('/academic-plan', academicPlanRouter)
+app.use('/important-dates', importantDatesRouter)
 app.use('/ai', aiRoutes)
 app.use('/ai-recomendation', aiRecomendationRouter)
 app.use('/course', courseRouter)
