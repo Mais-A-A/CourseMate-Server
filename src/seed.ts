@@ -12,17 +12,16 @@ import AcademicRule from './models/academicRule.model.js'
 import AcademicWarning from './models/academicWarning.model.js'
 import Schedule from './models/schedule.model.js'
 import AIRecomendation from './models/AIRecomendation.model.js'
-import importantDates from './models/importantDates.model.js'
+import { ImportantDate } from './models/importantDates.model.js'
 export const seed = async () => {
   await connectDatabase()
-
   const AcademicPlanModel = AcademicPlan as any
+  const ImportantDatesModel = ImportantDate as any
   const DepartmentModel = Department as any
   const CourseModel = Course as any
   const CourseSectionModel = CourseSection as any
   const UserModel = User as any
   const NotificationModel = Notification as any
-  const ImportantDatesModel = importantDates as any
   const AcademicRuleModel = AcademicRule as any
   const AcademicWarningModel = AcademicWarning as any
   const ScheduleModel = Schedule as any

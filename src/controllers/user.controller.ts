@@ -27,7 +27,9 @@ class UserController {
     try {
       const email = req.query.email
       if (!email || typeof email !== 'string') {
-        return res.status(400).json({ message: 'Email query parameter is required' })
+        return res
+          .status(400)
+          .json({ message: 'Email query parameter is required' })
       }
       const user = await userService.getUserByEmail(email)
       if (!user) {
@@ -39,6 +41,25 @@ class UserController {
     }
   }
 
+  async getUserBySupervisorEmail(req: Request, res: Response) {
+    try {
+      const supervisorEmail = req.query.supervisorEmail
+      if (!supervisorEmail || typeof supervisorEmail !== 'string') {
+        return res
+          .status(400)
+          .json({ message: 'Supervisor email query parameter is required' })
+      }
+      const users = await userService.getUserBySupervisorEmail(supervisorEmail)
+      if (!users || users.length === 0) {
+        return res
+          .status(404)
+          .json({ message: 'No users found for the given supervisor email ' })
+      }
+      res.status(200).json(users)
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching users', error })
+    }
+  }
   async createUser(req: Request, res: Response) {
     try {
       const userData = req.body
