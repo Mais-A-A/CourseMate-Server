@@ -4,9 +4,7 @@ import type { Request, Response } from 'express'
 class AIRecomendationController {
   async createAIRecomendation(req: Request, res: Response) {
     try {
-      const data = await aiRecomendationService.createAIRecomendation(
-        req.body,
-      )
+      const data = await aiRecomendationService.createAIRecomendation(req.body)
       res.status(201).json(data)
     } catch (error) {
       res.status(500).json({ error: 'Failed to create AI recommendation' })
@@ -25,7 +23,7 @@ class AIRecomendationController {
   async getAIRecomendationById(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.getAIRecomendationById(
-        req.params.id,
+        req.params.id as string,
       )
 
       if (!data) {
@@ -41,7 +39,7 @@ class AIRecomendationController {
   async updateAIRecomendation(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.updateAIRecomendation(
-        req.params.id,
+        req.params.id as string,
         req.body,
       )
 
@@ -58,7 +56,7 @@ class AIRecomendationController {
   async deleteAIRecomendation(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.deleteAIRecomendation(
-        req.params.id,
+        req.params.id as string,
       )
 
       if (!data) {
