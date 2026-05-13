@@ -2,7 +2,11 @@ import { Router } from 'express'
 import { aiRecomendationController } from '../controllers/AIRecomendation.controller.js'
 import { AIRecomendationSchema } from '../schemas/AIRecomendation.schema.js'
 import { validateRequest } from '../middlewares/validation.js'
-import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
+import {
+  requireAuth,
+  requireRole,
+  requireAuthorizeUserOrHigher,
+} from '../middlewares/auth.middleware.js'
 
 const aiRecomendationRouter = Router()
 
@@ -97,6 +101,44 @@ aiRecomendationRouter.get(
   aiRecomendationController.getAIRecomendationById,
 )
 
+/**
+ * @swagger
+ * /ai-recomendation/user/{student_id}:
+ *   get:
+ *     tags:
+ *       - AI Recommendations
+ *     summary: Get AI recommendations for a specific student
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: student_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: AI recommendations for the student
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AIRecomendation'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Student or recommendations not found
+ */
+aiRecomendationRouter.get(
+  '/user/:student_id',
+  requireAuth(),
+  requireAuthorizeUserOrHigher(),
+  aiRecomendationController.getAIRecomendationsByUserId,
+)
 /**
  * @swagger
  * /ai-recomendation:

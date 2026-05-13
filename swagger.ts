@@ -45,6 +45,7 @@ const options = {
       {
         name: 'AI Recommendations',
         description: 'AI recommendation management',
+        withCredentials: true,
       },
     ],
   },

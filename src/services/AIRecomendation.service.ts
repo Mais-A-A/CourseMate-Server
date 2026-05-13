@@ -14,11 +14,10 @@ class AIRecomendationService {
   async getAIRecomendationById(id: string) {
     return await AIRecomendationModel.findById(id).lean()
   }
-
-  async updateAIRecomendation(
-    id: string,
-    data: Partial<AIRecomendationType>,
-  ) {
+  async getAIRecomendationsByUserId(student_id: string) {
+    return await AIRecomendationModel.find({ student_id: student_id }).lean()
+  }
+  async updateAIRecomendation(id: string, data: Partial<AIRecomendationType>) {
     return await AIRecomendationModel.findByIdAndUpdate(id, data, {
       new: true,
     })

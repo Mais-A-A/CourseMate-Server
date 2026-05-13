@@ -36,6 +36,17 @@ class AIRecomendationController {
     }
   }
 
+  async getAIRecomendationsByUserId(req: Request, res: Response) {
+    try {
+      const data = await aiRecomendationService.getAIRecomendationsByUserId(
+        req.params.student_id as string,
+      )
+      res.json(data)
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch AI recommendations' })
+    }
+  }
+
   async updateAIRecomendation(req: Request, res: Response) {
     try {
       const data = await aiRecomendationService.updateAIRecomendation(
