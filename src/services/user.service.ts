@@ -21,9 +21,26 @@ class UserService {
   }
 
   async getUserBySupervisorEmail(supervisorEmail: string) {
-    return await User.find({ 'student_data.supervisor.supervisorEmail': supervisorEmail })
-      .select('-password')
-      .lean()
+    const users = await User.aggregate([
+      {
+        $lookup: {
+          from: 'AIRecomendation',
+          localField: 'student_data.studentNo',
+
+          foreignField: 'student_id',
+          as: 'ai_recommendations',
+        },
+      },
+      {
+        $lookup: {
+          from: 'courses',
+          localField: 'ai_recommendations.courses',
+          foreignField: '_id',
+          as: 'recommendation_courses',
+        },
+      },
+    ])
+    return users
   }
 
   async getUserById(id: string) {
