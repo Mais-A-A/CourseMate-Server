@@ -115,6 +115,46 @@ userRouter.get('/', requireAuth(), userController.getAllUsers)
 
 /**
  * @swagger
+ * /user/supervisor:
+ *   get:
+ *     tags:
+ *       - Users
+ *     summary: Get users by supervisor email
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: supervisorEmail
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: dr.ahmed@example.com
+ *     responses:
+ *       200:
+ *         description: List of users assigned to the supervisor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Supervisor email query parameter is required
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: No users found for the given supervisor email
+ *       500:
+ *         description: Internal server error
+ */
+userRouter.get(
+  '/supervisor',
+  requireAuth(),
+  userController.getUserBySupervisorEmail,
+)
+/**
+ * @swagger
  * /user/search:
  *   get:
  *     tags:
@@ -212,6 +252,7 @@ userRouter.get('/:id', requireAuth(), userController.getUserById)
  *       500:
  *         description: Internal server error
  */
+
 userRouter.post(
   '/',
   requireAuth(),

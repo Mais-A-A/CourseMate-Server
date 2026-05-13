@@ -20,6 +20,12 @@ class UserService {
     return await User.findOne({ email }).select('-password').lean()
   }
 
+  async getUserBySupervisorEmail(supervisorEmail: string) {
+    return await User.find({ 'student_data.supervisor.supervisorEmail': supervisorEmail })
+      .select('-password')
+      .lean()
+  }
+
   async getUserById(id: string) {
     return await User.findById(id).select('-password').lean()
   }
