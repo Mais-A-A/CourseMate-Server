@@ -45,7 +45,7 @@ class UserService {
     return await User.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
-    })
+    }).select('-password')
   }
 
   async deleteUser(id: string) {

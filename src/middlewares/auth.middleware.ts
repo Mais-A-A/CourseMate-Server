@@ -44,13 +44,16 @@ export function requireAuth() {
 }
 
 export function requireRole(...roles: UserRole[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.currentUser) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const user = (await verifyJWT(
+      req.cookies.token || req.headers.authorization?.split(' ')[1],
+    )) as JwtPayload
+    if (!user) {
       return res
         .status(401)
         .json({ message: 'You must be logged in to access this resource' })
     }
-    if (!roles.includes(req.currentUser.role)) {
+    if (!roles.includes(user.role)) {
       return res
         .status(403)
         .json({ message: 'You are not authorized to access this resource' })
@@ -59,25 +62,28 @@ export function requireRole(...roles: UserRole[]) {
   }
 }
 
-export function requireAuthorizeUserOrHigher(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const userId = req.params.userId || req.params.id
-  if (!req.currentUser) {
-    return res
-      .status(401)
-      .json({ message: 'You must be logged in to access this resource' })
+export function requireAuthorizeUserOrHigher() {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const userEmail = req.query.email as string
+    console.log('Checking authorization for user with email:', userEmail)
+    const user = (await verifyJWT(
+      req.cookies.token || req.headers.authorization?.split(' ')[1],
+    )) as JwtPayload
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: 'You must be logged in to access this resource' })
+    }
+    console.log('Authenticated user:', user.email.concat('.ps'))
+    if (
+      user.role !== 'admin' &&
+      user.role !== 'supervisor' &&
+      user.email != userEmail.concat('.ps')
+    ) {
+      return res
+        .status(403)
+        .json({ message: 'You are not authorized to access this resource' })
+    }
+    next()
   }
-  if (
-    req.currentUser.role !== 'admin' &&
-    req.currentUser.role !== 'supervisor' &&
-    req.currentUser.studentId !== userId
-  ) {
-    return res
-      .status(403)
-      .json({ message: 'You are not authorized to access this resource' })
-  }
-  next()
 }

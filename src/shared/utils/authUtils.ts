@@ -61,7 +61,7 @@ export async function verifyJWT(token: string): Promise<UniversityUser | null> {
     return decoded
   } catch (err) {
     console.error('JWT verification failed:', err)
-    
+
     return null
   }
 }

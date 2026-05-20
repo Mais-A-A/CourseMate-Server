@@ -2,7 +2,11 @@ import { userController } from '../controllers/user.controller.js'
 import { Router } from 'express'
 import { userSchema } from '../schemas/user.schemas.js'
 import { validateRequest } from '../middlewares/validation.js'
-import { requireAuth, requireRole } from '../middlewares/auth.middleware.js'
+import {
+  requireAuth,
+  requireRole,
+  requireAuthorizeUserOrHigher,
+} from '../middlewares/auth.middleware.js'
 const userRouter = Router()
 
 /**
@@ -186,7 +190,11 @@ userRouter.get(
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/search', requireAuth(), userController.getUserByEmail)
+userRouter.get(
+  '/search',
+  requireAuthorizeUserOrHigher(),
+  userController.getUserByEmail,
+)
 
 /**
  * @swagger
