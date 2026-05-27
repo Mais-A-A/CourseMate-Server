@@ -48,8 +48,8 @@ authRouter.get(
     res
       .cookie('token', token, {
         httpOnly: true,
-        secure: envVars.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .redirect(`${envVars.CLIENT_URL}/dashboard`)
@@ -76,8 +76,8 @@ authRouter.post('/logout', requireAuth(), (req: Request, res: Response) => {
   res
     .clearCookie('token', {
       httpOnly: true,
-      secure: envVars.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
     })
     .json({ message: 'Logged out successfully' })
 })
