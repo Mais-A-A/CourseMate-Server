@@ -1,5 +1,65 @@
 import { User } from '../models/user.model.js'
+import AcademicPlan from '../models/academicPlan.model.js'
 import type { User as UserType } from '../schemas/user.schemas.js'
+
+const FAIL_GRADES = new Set(['F', 'راسب', 'f', 'fail', 'FAIL', 'Fail'])
+
+async function enrichWithCourseHistory(user: any) {
+  if (!user || user.role !== 'student' || !user.student_data?.academic_plan) {
+    return user
+  }
+
+  const plan = (await AcademicPlan.findById(
+    user.student_data.academic_plan,
+  ).lean()) as any
+
+  if (!plan) return user
+
+  const completed_courses: object[] = []
+  let completed_credit_hours = 0
+
+  for (const group of plan.groups ?? []) {
+    for (const course of group.groupCoursList ?? []) {
+      if (!course.courseGrades?.length) continue
+
+      for (const grade of course.courseGrades) {
+        completed_courses.push({
+          courseNo: course.courseNo,
+          courseName: course.coursesArabicName ?? null,
+          creditHours: course.coursesCreditHours ?? null,
+          groupName: group.groupArabicName ?? null,
+          numericGrade: grade.gradeNGrade ?? null,
+          result: grade.gradeResultGrade ?? null,
+          letterGrade: grade.gradeCGrade ?? null,
+        })
+      }
+
+      const lastGrade = course.courseGrades[course.courseGrades.length - 1]
+
+      const numeric = lastGrade?.gradeNGrade
+      const result = lastGrade?.gradeResultGrade
+      const letter = lastGrade?.gradeCGrade
+
+      const passed =
+        (result && !FAIL_GRADES.has(result)) ||
+        (letter && !FAIL_GRADES.has(letter)) ||
+        (numeric !== undefined && numeric !== null && numeric >= 50)
+
+      if (passed) {
+        completed_credit_hours += course.coursesCreditHours ?? 0
+      }
+    }
+  }
+
+  return {
+    ...user,
+    student_data: {
+      ...user.student_data,
+      completed_courses,
+      completed_credit_hours,
+    },
+  }
+}
 class UserService {
   async createUser(userData: UserType) {
     const existingUser = await User.findOne({ email: userData.email })
@@ -17,17 +77,21 @@ class UserService {
   }
 
   async getUserByEmail(email: string) {
-    return await User.findOne({ email }).select('-password').lean()
+    const user = await User.findOne({ email }).select('-password').lean()
+    return enrichWithCourseHistory(user)
   }
 
   async getUserBySupervisorEmail(supervisorEmail: string) {
-    return await User.find({ 'student_data.supervisor.supervisorEmail': supervisorEmail })
+    return await User.find({
+      'student_data.supervisor.supervisorEmail': supervisorEmail,
+    })
       .select('-password')
       .lean()
   }
 
   async getUserById(id: string) {
-    return await User.findById(id).select('-password').lean()
+    const user = await User.findById(id).select('-password').lean()
+    return enrichWithCourseHistory(user)
   }
 
   async updateUser(id: string, updateData: Partial<UserType>) {
