@@ -32,40 +32,93 @@ async function fetchAcademicPlan(
   ).lean() as Promise<AcademicPlanType | null>
 }
 
-function extractCoursesFromAcademicPlan(academicPlan: AcademicPlanType) {
+const FAIL_GRADES = new Set(['F', 'راسب', 'f', 'fail', 'FAIL', 'Fail'])
+
+function courseHasPassed(
+  lastGrade:
+    | {
+        gradeNGrade?: number | undefined
+        gradeResultGrade?: string | undefined
+        gradeCGrade?: string | undefined
+        [key: string]: unknown
+      }
+    | undefined,
+): boolean {
+  if (!lastGrade) return false
+  const result = lastGrade.gradeResultGrade
+  const numeric = lastGrade.gradeNGrade
+  const letter = lastGrade.gradeCGrade
+  if (result && FAIL_GRADES.has(result)) return false
+  if (letter && FAIL_GRADES.has(letter)) return false
+  if (numeric !== undefined && numeric !== null && numeric > 0)
+    return numeric >= 50
+  if (result) return true
+  if (letter) return true
+  return false
+}
+
+export function extractCoursesFromAcademicPlan(academicPlan: AcademicPlanType) {
   const completedCourses = new Map<string, unknown>()
   const remainingCourses = new Map<string, unknown>()
+  const passedAlternativeGroups = new Set<string>()
 
   academicPlan.groups.forEach((group) => {
-    const groupCourses = new Map<string, unknown>()
-    groupCourses.set(
-      group.groupArabicName!,
-      group.groupCoursList.map((course) => {
-        const courseInfo = {
-          courseNo: course.courseNo,
-          coursesArabicName: course.coursesArabicName,
-          coursesCreditHours: course.coursesCreditHours,
-          courseLevel: course.courseLevel,
-          courseSemester: course.courseSemester,
-          courseYear: course.courseYear,
-          creditHours: course.coursesCreditHours,
-          preCourse: course.preCourse,
-          grade:
-            course.courseGrades[course.courseGrades.length - 1]?.gradeNGrade &&
-            course.courseGrades[course.courseGrades.length - 1]
-              ?.gradeResultGrade !== 'F'
-              ? course.courseGrades[course.courseGrades.length - 1]?.gradeNGrade
-              : null,
-        }
-        if (course.courseGrades.length > 0) {
-          completedCourses.set(course.coursesArabicName!, courseInfo)
-        } else {
-          remainingCourses.set(course?.courseNo?.toString()!, courseInfo)
-        }
-        return courseInfo
-      }),
-    )
+    const requiredHours = group.requiredHours ?? 0
+
+    const dbPassedHours =
+      typeof group.passedHours === 'number' ? group.passedHours : -1
+    const actualPassedHours =
+      dbPassedHours > 0
+        ? dbPassedHours
+        : group.groupCoursList.reduce((sum, course) => {
+            const lastGrade =
+              course.courseGrades[course.courseGrades.length - 1]
+            return courseHasPassed(lastGrade)
+              ? sum + (course.coursesCreditHours ?? 0)
+              : sum
+          }, 0)
+
+    const groupSatisfied =
+      requiredHours > 0 && actualPassedHours >= requiredHours
+
+    group.groupCoursList.forEach((course) => {
+      const lastGrade = course.courseGrades[course.courseGrades.length - 1]
+      const hasPassed = courseHasPassed(lastGrade)
+
+      const courseInfo = {
+        courseNo: course.courseNo,
+        coursesArabicName: course.coursesArabicName,
+        coursesCreditHours: course.coursesCreditHours,
+        courseLevel: course.courseLevel,
+        courseSemester: course.courseSemester,
+        courseYear: course.courseYear,
+        creditHours: course.coursesCreditHours,
+        preCourse: course.preCourse,
+        alternativeNo: course.alternativeNo,
+        groupName: group.groupArabicName,
+        grade: hasPassed
+          ? (lastGrade?.gradeNGrade ?? lastGrade?.gradeResultGrade)
+          : null,
+        previouslyFailed: course.courseGrades.length > 0 && !hasPassed,
+      }
+
+      if (hasPassed) {
+        completedCourses.set(course.coursesArabicName!, courseInfo)
+        if (course.alternativeNo)
+          passedAlternativeGroups.add(course.alternativeNo)
+      } else if (!groupSatisfied) {
+        remainingCourses.set(course.courseNo.toString(), courseInfo)
+      }
+    })
   })
+
+  remainingCourses.forEach((courseInfo, key) => {
+    const alt = (courseInfo as any).alternativeNo
+    if (alt && passedAlternativeGroups.has(alt)) {
+      remainingCourses.delete(key)
+    }
+  })
+
   return { completedCourses, remainingCourses }
 }
 
@@ -75,18 +128,18 @@ export function classifyCourseByElegibility(
   const eligibleCourses = new Map<string, unknown>()
   const ineligibleCourses = new Map<string, unknown>()
 
-  remainingCourses.forEach((courseInfo, courseName) => {
-    const preCourse = (courseInfo as any).preCourse as string[]
+  remainingCourses.forEach((courseInfo, courseKey) => {
+    const preCourse = (courseInfo as any).preCourse as number[]
 
     const isEligible =
       !preCourse ||
       preCourse.length === 0 ||
-      preCourse.every((pre) => !remainingCourses.has(pre))
+      preCourse.every((pre) => !remainingCourses.has(String(pre)))
 
     if (isEligible) {
-      eligibleCourses.set(courseName, courseInfo)
+      eligibleCourses.set(courseKey, courseInfo)
     } else {
-      ineligibleCourses.set(courseName, courseInfo)
+      ineligibleCourses.set(courseKey, courseInfo)
     }
   })
 
@@ -157,22 +210,23 @@ export async function fetchContext(userId: string) {
     .join('\n')
 
   const eligibleCoursesText = [...eligibleCourses.entries()]
-    .map(([courseName, courseInfo]) => {
+    .map(([, courseInfo]) => {
       const c = courseInfo as any
       const sem = c.courseSemester != null ? `Sem ${c.courseSemester}` : null
       const yr = c.courseYear != null ? `Year ${c.courseYear}` : null
       const when = [yr, sem].filter(Boolean).join(', ')
-      return `- ${courseName}${when ? ` (${when})` : ''}`
+      const failed = c.previouslyFailed ? 'Previously failed' : ''
+      return `- ${c.coursesArabicName ?? c.courseNo}${when ? ` (${when})` : ''}${failed}`
     })
     .join('\n')
 
   const ineligibleCoursesText = [...ineligibleCourses.entries()]
-    .map(([courseName, courseInfo]) => {
+    .map(([, courseInfo]) => {
       const c = courseInfo as any
       const sem = c.courseSemester != null ? `Sem ${c.courseSemester}` : null
       const yr = c.courseYear != null ? `Year ${c.courseYear}` : null
       const when = [yr, sem].filter(Boolean).join(', ')
-      return `- ${courseName}${when ? ` (${when})` : ''}`
+      return `- ${c.coursesArabicName ?? c.courseNo}${when ? ` (${when})` : ''}`
     })
     .join('\n')
 
