@@ -1,7 +1,18 @@
 import { Router } from 'express'
-import { chat, generateScheduleHandler, generateScheduleForStudentHandler } from '../controllers/ai.controller.js'
+import {
+  chat,
+  generateScheduleHandler,
+  generateScheduleForStudentHandler,
+  approveScheduleHandler,
+  getApprovedScheduleHandler,
+  getScheduleHistoryHandler,
+} from '../controllers/ai.controller.js'
 import { requireAuth } from '../middlewares/auth.middleware.js'
-import { ChatSchema, GenerateScheduleSchema, GenerateScheduleForStudentSchema } from '../schemas/ai.schema.js'
+import {
+  ChatSchema,
+  GenerateScheduleSchema,
+  GenerateScheduleForStudentSchema,
+} from '../schemas/ai.schema.js'
 import { validateRequest } from '../middlewares/validation.js'
 
 const router = Router()
@@ -136,4 +147,70 @@ router.post(
   requireAuth(),
   generateScheduleForStudentHandler,
 )
+/**
+ * @swagger
+ * /ai/schedule/approve:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Approve the student's latest pending AI-generated schedule
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Schedule approved and saved
+ *       404:
+ *         description: No pending schedule found
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/schedule/approve', requireAuth(), approveScheduleHandler)
+
+/**
+ * @swagger
+ * /ai/schedule/approved:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: Get the student's last approved AI-generated schedule
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: acdYear
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: semesterNo
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Approved schedule found
+ *       404:
+ *         description: No approved schedule found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/schedule/approved', requireAuth(), getApprovedScheduleHandler)
+/**
+ * @swagger
+ * /ai/schedule/history:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: Get all AI-generated schedule suggestions for the current student (pending + approved)
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of schedule suggestions sorted by newest first
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/schedule/history', requireAuth(), getScheduleHistoryHandler)
+
 export default router
