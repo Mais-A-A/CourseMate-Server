@@ -12,6 +12,7 @@ import AcademicPlan from '../models/academicPlan.model.js'
 import { type AcademicPlan as AcademicPlanType } from '../schemas/academicPlan.schema.js'
 import { connectDatabase } from '../config/db.js'
 import fs from 'node:fs'
+import { AISchedule } from '../models/aiSchedule.model.js'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import mongoose from 'mongoose'
@@ -258,6 +259,18 @@ export async function fetchContext(userId: string) {
     .join('\n')
 
     */
+  const aiSchedule = await AISchedule.findOne({
+    studentNo: userId,
+  }).lean()
+
+  const aiScheduleText = aiSchedule
+    ? `- Academic Year: ${aiSchedule.acdYear} | Semester: ${aiSchedule.semesterNo} | Total Credit Hours: ${aiSchedule.totalCreditHours} | Status: ${aiSchedule.status}\n  Sections:\n${aiSchedule.sections
+        .map(
+          (sec) =>
+            `    - ${sec.courseName} (Course No: ${sec.courseNo}, Section: ${sec.sectionNo}, Credit Hours: ${sec.creditHours}, Time: ${sec.secTime ?? 'N/A'}, Room: ${sec.roomName ?? 'N/A'}, Building: ${sec.buildingName ?? 'N/A'}, Supervisor: ${sec.supervisorName ?? 'N/A'}, Capacity: ${sec.capacity ?? 'N/A'}, Enrolled: ${sec.enrolled ?? 'N/A'}, Open: ${sec.isOpen ? 'Yes' : 'No'}, Package: ${sec.packageCaption ?? 'N/A'}, Reason: ${sec.reason || 'None'})`,
+        )
+        .join('\n')}`
+    : 'None'
 
   const levelsText = (academicPlan.levels ?? [])
     .map((level) => {
@@ -318,7 +331,9 @@ ${academicWarningsText || 'None'}
 
 ${academicRulesText || 'None'}
 
+## AI-Generated Schedule
 
+${aiScheduleText || 'None'}
 
 `.trim()
 }
