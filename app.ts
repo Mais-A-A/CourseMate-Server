@@ -16,6 +16,7 @@ import { scheduleRouter } from './src/routes/schedule.routes.js'
 import { importantDatesRouter } from './src/routes/importantDates.routes.js'
 import { analyticsRouter } from './src/routes/analytics.routes.js'
 import aiRoutes from './src/routes/ai.route.js'
+import knowledgeBaseRouter from './src/routes/knowledgeBase.route.js'
 import morgan from 'morgan'
 import cors from 'cors'
 
@@ -55,6 +56,7 @@ app.use('/course-section', courseSectionRouter)
 app.use('/department', departmentRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/analytics', analyticsRouter)
+app.use('/knowledge-base', knowledgeBaseRouter)
 
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase().catch((err) => {

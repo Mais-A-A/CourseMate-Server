@@ -190,7 +190,164 @@ async function fetchEligibleSections(
   return deduplicated
 }
 
-function buildSchedulePrompt(params: {
+const SCHEDULE_PROMPT_TEMPLATE = `
+You are CourseMate, a smart academic advisor for Palestine Polytechnic University students.
+Your task is to generate an optimal semester schedule based on the student's data, user preferences and available course sections.
+Always respond in the same language the student uses. If the student writes in Arabic, respond in Arabic. If in English, respond in English.
+
+{GRADUATION_NOTE}
+---
+
+### 1. Student Profile
+- **Name**: {STUDENT_NAME}
+- **GPA**: {GPA}
+- **Year Level**: {YEAR_LEVEL}
+- **Completed Credit Hours**: {HOURS_SUMMARY}
+- **Academic Status**: {ACADEMIC_STATUS}
+- **Academic Year / Semester**: {ACD_YEAR} — Semester {SEMESTER_NO}
+
+### 2. Academic Context
+**Performance Summary:**
+{PERFORMANCE_SUMMARY}
+
+**Semester History (most recent first):**
+{SCHEDULE_HISTORY}
+
+**Academic Warnings:**
+{ACADEMIC_WARNINGS}
+
+**University Academic Rules:**
+{ACADEMIC_RULES}
+
+### 3. Student Preferences
+{PREFERENCES}
+
+### 4. Available Course Sections
+(eligible for this student, open this semester)
+{SECTIONS}
+
+---
+
+### 5. Instructions
+
+1. **Hour Load**: {INSTRUCTION_HOUR_LOAD}
+
+2. **Priority Order**:
+   - Include **PRIORITY courses** (marked [PRIORITY]) first — previously failed courses.
+   - Prefer courses matching the student's year level (use plan_year / plan_sem as a soft guide). Do not warn about courses whose plan_year is more than 1 year ahead — they are not due yet.
+   - {INSTRUCTION_ELECTIVES}
+
+3. **Rules to follow strictly**:
+   - **No time conflicts** — Never include two sections that overlap in time.
+   - **No duplicate courses** — If the same course appears in multiple sections, select only one that best fits the student's preferences.
+   - **Capacity** — Never include a section where enrolled >= capacity. If all sections of an important course are full, add a warning in the student's language and recommend deferring to next semester. Do not suggest manual enrollment.
+   - **Zero-credit courses** — Include only if the student clearly needs them based on their academic plan; otherwise exclude.
+
+4. **If the schedule cannot be fully satisfied** — fulfill as much as possible and explain the limitation clearly in the warnings field in the student's language.
+
+5. **Low Hour Load**: {INSTRUCTION_LOW_HOURS}
+
+6. **Before responding, verify**:
+   - Sum of creditHours = totalCreditHours.
+   - No courseNo appears more than once.
+   - No time conflicts between selected sections.
+
+---
+
+### 6. Response Format
+Respond ONLY with a valid JSON object. No markdown backticks. No text outside the JSON.
+{
+  "sections": [
+    {
+      "courseNo": <number>,
+      "courseName": "<string>",
+      "sectionNo": <number>,
+      "creditHours": <number>,
+      "secTime": "<string or null>",
+      "supervisorName": "<string or null>",
+      "capacity": <number or null>,
+      "enrolled": <number or null>,
+      "isOpen": true,
+      "packageCaption": "<string or null>",
+      "reason": "<one sentence explaining why this course is recommended — in the same language as the student's question>"
+    }
+  ],
+  "totalCreditHours": <number>,
+  "reasoning": "<summary in the same language as the student's question: student situation, total hours, and key notes>",
+  "warnings": ["<important notes for the student — in the same language as the student's question>"]
+}
+`.trim()
+
+function buildYearLevel(completedHours: number): string {
+  if (completedHours <= 33) return 'First Year (≤33 hrs completed)'
+  if (completedHours <= 67) return 'Second Year (34–67 hrs)'
+  if (completedHours <= 101) return 'Third Year (68–101 hrs)'
+  if (completedHours <= 135) return 'Fourth Year (102–135 hrs)'
+  return 'Fifth Year (136+ hrs)'
+}
+
+function buildGraduationNote(
+  isExpectedToGraduate: boolean,
+  completedHours: number,
+  totalPlanHours: number,
+  remainingHours: number | null,
+): string {
+  if (isExpectedToGraduate && remainingHours !== null)
+    return `\n⚠️ GRADUATION SEMESTER + HARD LIMIT: This student is "متوقع تخرجه" (expected to graduate). Completed ${completedHours} of ${totalPlanHours} hours — exactly ${remainingHours} credit hours remain. Total recommended creditHours MUST NOT exceed ${remainingHours}. Treat this as a final-semester student.\n`
+  if (isExpectedToGraduate)
+    return `\n⚠️ GRADUATION SEMESTER: This student is officially marked as "متوقع تخرجه" (expected to graduate this semester). They have completed ${completedHours} credit hours. The available sections below represent their remaining courses. Do NOT recommend more hours than what is actually listed as available. Treat this as a final-semester student.\n`
+  if (remainingHours !== null && remainingHours <= 21)
+    return `\n⚠️ NOTE: This student has only ${remainingHours} credit hours remaining to graduate. Do NOT recommend more than ${remainingHours} credit hours total.\n`
+  return ''
+}
+
+function buildSectionsText(
+  eligibleSections: CourseSectionType[],
+  failedCourseNos: Set<number>,
+  courseGroupMap: Map<number, string>,
+  coursePlanMap: Map<number, { year: number | null; sem: number | null }>,
+): string {
+  if (eligibleSections.length === 0) return 'No sections available.'
+  return eligibleSections
+    .map((s) => {
+      const priorityTag = failedCourseNos.has(s.courseNo)
+        ? '[PRIORITY - student previously failed this course] '
+        : ''
+      const groupName = courseGroupMap.get(s.courseNo) ?? ''
+      const groupTag = groupName ? ` | group: ${groupName}` : ''
+      const plan = coursePlanMap.get(s.courseNo)
+      const planTag =
+        plan?.year != null
+          ? ` | plan_year: ${plan.year}${plan.sem != null ? `, plan_sem: ${plan.sem}` : ''}`
+          : ''
+      return `- ${priorityTag}courseNo: ${s.courseNo} | name: ${s.courseName} | section: ${s.sectionNo} | credits: ${s.courseCredietHrs}${groupTag}${planTag} | time: ${s.secTime ?? 'N/A'} | room: ${s.roomName ?? 'N/A'} | supervisor: ${s.supervisorName ?? 'N/A'} | capacity: ${s.capacity ?? 'N/A'} | enrolled: ${s.counter ?? 'N/A'} | package: ${s.packageCaption ?? 'N/A'}`
+    })
+    .join('\n')
+}
+
+function buildInstructions(
+  isExpectedToGraduate: boolean,
+  remainingHours: number | null,
+) {
+  const hourLoad =
+    isExpectedToGraduate && remainingHours !== null
+      ? `FINAL SEMESTER HARD LIMIT = ${remainingHours} hours. Total creditHours MUST equal exactly ${remainingHours}. Do NOT add extra courses beyond what is needed.`
+      : isExpectedToGraduate
+        ? 'FINAL SEMESTER: Only recommend courses the student genuinely needs. Do not fill up to 18 hours just because GPA allows it. The available sections ARE the remaining courses — select thoughtfully.'
+        : "HOUR LOAD DECISION: University policy allows 12–18 hrs/semester (max 15 if academically warned; up to 21 with dept. approval only if GPA ≥ 80%). Do NOT treat 18 as the default — it is the ceiling, not the target. Use the Academic Performance Summary above to guide your decision: 18 hours is appropriate only for students who passed ALL their registered hours last semester AND have a GPA ≥ 80% with a stable or improving trend. For everyone else, 12–16 hours is the right range — choose based on this student's actual track record, not the policy maximum. Always justify your hour choice explicitly in the reasoning field."
+
+  const lowHours = isExpectedToGraduate
+    ? 'If the total recommended hours are less than 12, clearly state this is a near-graduation final semester and advise the student to confirm their plan with their academic supervisor.'
+    : 'If total hours < 12 for a regular semester, advise the student to consult their supervisor.'
+
+  const electives = isExpectedToGraduate
+    ? 'Each section has a "group" field showing its academic group. Courses from groups containing "اختياري" or "حرة" (elective) should only be included if the student has NOT yet satisfied that group\'s requirement. When in doubt between a mandatory course and an elective, always prefer the mandatory one.'
+    : 'Follow the academic plan requirements.'
+
+  return { hourLoad, lowHours, electives }
+}
+
+type PromptParams = {
   studentName: string
   gpa: number | string
   academicWarnings: string
@@ -207,136 +364,69 @@ function buildSchedulePrompt(params: {
   preferences: string
   acdYear: number
   semesterNo: number
-}): string {
-  const {
-    studentName,
-    gpa,
-    academicWarnings,
-    academicRules,
-    completedHours,
-    totalPlanHours,
-    isExpectedToGraduate,
-    eligibleSections,
-    courseGroupMap,
-    coursePlanMap,
-    failedCourseNos,
-    scheduleHistory,
-    performanceSummary,
-    preferences,
-    acdYear,
-    semesterNo,
-  } = params
+}
 
+function buildSchedulePrompt(params: PromptParams): string {
   const remainingHours =
-    totalPlanHours > 0 ? Math.max(0, totalPlanHours - completedHours) : null
+    params.totalPlanHours > 0
+      ? Math.max(0, params.totalPlanHours - params.completedHours)
+      : null
 
-  const yearLevel =
-    completedHours <= 33
-      ? 'First Year (≤33 hrs completed)'
-      : completedHours <= 67
-        ? 'Second Year (34–67 hrs)'
-        : completedHours <= 101
-          ? 'Third Year (68–101 hrs)'
-          : completedHours <= 135
-            ? 'Fourth Year (102–135 hrs)'
-            : 'Fifth Year (136+ hrs)'
-
-  const sectionsText = eligibleSections
-    .map((s) => {
-      const priorityTag = failedCourseNos.has(s.courseNo)
-        ? '[PRIORITY - student previously failed this course] '
-        : ''
-      const groupName = courseGroupMap.get(s.courseNo) ?? ''
-      const groupTag = groupName ? ` | group: ${groupName}` : ''
-      const plan = coursePlanMap.get(s.courseNo)
-      const planTag =
-        plan?.year != null
-          ? ` | plan_year: ${plan.year}${plan.sem != null ? `, plan_sem: ${plan.sem}` : ''}`
-          : ''
-      return `- ${priorityTag}courseNo: ${s.courseNo} | name: ${s.courseName} | section: ${s.sectionNo} | credits: ${s.courseCredietHrs}${groupTag}${planTag} | time: ${s.secTime ?? 'N/A'} | room: ${s.roomName ?? 'N/A'} | supervisor: ${s.supervisorName ?? 'N/A'} | capacity: ${s.capacity ?? 'N/A'} | enrolled: ${s.counter ?? 'N/A'} | package: ${s.packageCaption ?? 'N/A'}`
-    })
-    .join('\n')
-
-  const graduationNote =
-    isExpectedToGraduate && remainingHours !== null
-      ? `⚠️ GRADUATION SEMESTER + HARD LIMIT: This student is "متوقع تخرجه" (expected to graduate). Completed ${completedHours} of ${totalPlanHours} hours — exactly ${remainingHours} credit hours remain. Total recommended creditHours MUST NOT exceed ${remainingHours}. Treat this as a final-semester student.`
-      : isExpectedToGraduate
-        ? `⚠️ GRADUATION SEMESTER: This student is officially marked as "متوقع تخرجه" (expected to graduate this semester). They have completed ${completedHours} credit hours. The available sections below represent their remaining courses. Do NOT recommend more hours than what is actually listed as available. Treat this as a final-semester student.`
-        : remainingHours !== null && remainingHours <= 21
-          ? `⚠️ NOTE: This student has only ${remainingHours} credit hours remaining to graduate. Do NOT recommend more than ${remainingHours} credit hours total.`
-          : null
+  const hoursSummary =
+    remainingHours !== null
+      ? `${params.completedHours} / ${params.totalPlanHours} (${remainingHours} hours remaining to graduate)`
+      : `${params.completedHours}`
 
   const preferencesText =
-    preferences?.trim() && preferences.trim().toLowerCase() !== 'string'
-      ? preferences.trim()
+    params.preferences?.trim() &&
+    params.preferences.trim().toLowerCase() !== 'string'
+      ? params.preferences.trim()
       : 'No specific preferences provided.'
 
-  return `
-You are an academic schedule advisor for Palestine Polytechnic University.
-Your task is to generate an optimal semester schedule for the student below.
-${graduationNote ? `\n${graduationNote}\n` : ''}
-## Student Information
-- Name: ${studentName}
-- GPA: ${gpa}
-- Year Level: ${yearLevel}
-- Completed Credit Hours: ${completedHours}${remainingHours !== null ? ` / ${totalPlanHours} (${remainingHours} hours remaining to graduate)` : ''}
-- Academic Status: ${isExpectedToGraduate ? 'متوقع تخرجه (FINAL SEMESTER)' : 'منتظم'}
-- Academic Year for Schedule: ${acdYear}, Semester: ${semesterNo}
+  const instructions = buildInstructions(
+    params.isExpectedToGraduate,
+    remainingHours,
+  )
 
-## Academic Performance Summary
-${performanceSummary}
-
-## Semester History (most recent first)
-${scheduleHistory || 'No history available.'}
-
-## Academic Warnings
-${academicWarnings || 'None'}
-
-## Academic Rules
-${academicRules || 'None'}
-
-## Student Preferences
-${preferencesText}
-
-## Available Course Sections (eligible for this student, open this semester)
-${sectionsText || 'No sections available.'}
-
-## Instructions
-1. ${isExpectedToGraduate && remainingHours !== null ? `FINAL SEMESTER HARD LIMIT = ${remainingHours} hours. Total creditHours MUST equal exactly ${remainingHours}. Do NOT add extra courses beyond what is needed.` : isExpectedToGraduate ? 'FINAL SEMESTER: Only recommend courses the student genuinely needs. Do not fill up to 18 hours just because GPA allows it. The available sections ARE the remaining courses — select thoughtfully.' : `HOUR LOAD DECISION: University policy allows 12–18 hrs/semester (max 15 if academically warned; up to 21 with dept. approval only if GPA ≥ 80%). Do NOT treat 18 as the default — it is the ceiling, not the target. Use the Academic Performance Summary above to guide your decision: 18 hours is appropriate only for students who passed ALL their registered hours last semester AND have a GPA ≥ 80% with a stable or improving trend. For everyone else, 12–16 hours is the right range — choose based on this student's actual track record, not the policy maximum. Always justify your hour choice explicitly in the reasoning field.`}
-2. PRIORITY courses (marked [PRIORITY]) are ones the student previously failed — include them first.
-3. Avoid time conflicts between sections.
-4. NEVER include a section in the schedule if enrolled >= capacity (it is full). For important courses where ALL sections are full: add a brief warning in Arabic explaining the course is important but unavailable this semester, and recommend deferring it to next semester. Do NOT suggest manual enrollment or contacting a supervisor — that decision belongs to the student and their supervisor, not to you.
-5. ${isExpectedToGraduate ? 'If the total recommended hours are less than 12, clearly state this is a near-graduation final semester and advise the student to confirm their plan with their academic supervisor.' : 'If total hours < 12 for a regular semester, advise the student to consult their supervisor.'}
-6. Each section has a "plan_year" and "plan_sem" field indicating when this course is recommended in the academic plan. Use these as a soft guide — prefer courses closer to the student's current year level. A 1st-year student should rarely take a plan_year 3 or 4 course. That said, use your judgment: if a course is a natural next step and the student is clearly ready, it is fine to include it. Also, do NOT add warnings about unavailable courses whose plan_year is more than 1 year ahead of the student's current year — they are simply not due yet and mentioning them creates unnecessary noise.
-7. Think step by step. Verify the sum of creditHours before finalizing.
-8. ${isExpectedToGraduate ? 'Each section has a "group" field showing its academic group. Courses from groups containing "اختياري" or "حرة" (elective) should only be included if the student has NOT yet satisfied that group\'s requirement. When in doubt between a mandatory course and an elective, always prefer the mandatory one.' : 'Follow the academic plan requirements.'}
-
-## Notes on zero-credit courses
-Zero-credit courses (creditHours = 0) are usually remedial/placement language courses (e.g. إنجليزي A2). Only include them if you are confident the student genuinely needs them based on their academic plan. If uncertain, exclude them — the student can register for them separately.
-
-## Response Format
-Respond ONLY with a valid JSON object. No explanation outside the JSON. No markdown backticks.
-{
-  "sections": [
-    {
-      "courseNo": <number>,
-      "courseName": "<string>",
-      "sectionNo": <number>,
-      "creditHours": <number>,
-      "secTime": "<string or null>",
-      "supervisorName": "<string or null>",
-      "capacity": <number or null>,
-      "enrolled": <number or null>,
-      "isOpen": true,
-      "packageCaption": "<string or null>",
-      "reason": "<one sentence in Arabic explaining why this specific course is recommended for this student>"
-    }
-  ],
-  "totalCreditHours": <number>,
-  "reasoning": "<overall summary in Arabic: student situation, total hours, and any important notes>",
-  "warnings": ["<important notes for the student in Arabic>"]
-}
-`.trim()
+  return SCHEDULE_PROMPT_TEMPLATE.replace(
+    '{GRADUATION_NOTE}',
+    buildGraduationNote(
+      params.isExpectedToGraduate,
+      params.completedHours,
+      params.totalPlanHours,
+      remainingHours,
+    ),
+  )
+    .replace('{STUDENT_NAME}', params.studentName)
+    .replace('{GPA}', String(params.gpa))
+    .replace('{YEAR_LEVEL}', buildYearLevel(params.completedHours))
+    .replace('{HOURS_SUMMARY}', hoursSummary)
+    .replace(
+      '{ACADEMIC_STATUS}',
+      params.isExpectedToGraduate ? 'متوقع تخرجه (FINAL SEMESTER)' : 'منتظم',
+    )
+    .replace('{ACD_YEAR}', String(params.acdYear))
+    .replace('{SEMESTER_NO}', String(params.semesterNo))
+    .replace('{PERFORMANCE_SUMMARY}', params.performanceSummary)
+    .replace(
+      '{SCHEDULE_HISTORY}',
+      params.scheduleHistory || 'No history available.',
+    )
+    .replace('{ACADEMIC_WARNINGS}', params.academicWarnings || 'None')
+    .replace('{ACADEMIC_RULES}', params.academicRules || 'None')
+    .replace('{PREFERENCES}', preferencesText)
+    .replace(
+      '{SECTIONS}',
+      buildSectionsText(
+        params.eligibleSections,
+        params.failedCourseNos,
+        params.courseGroupMap,
+        params.coursePlanMap,
+      ),
+    )
+    .replace('{INSTRUCTION_HOUR_LOAD}', instructions.hourLoad)
+    .replace('{INSTRUCTION_LOW_HOURS}', instructions.lowHours)
+    .replace('{INSTRUCTION_ELECTIVES}', instructions.electives)
 }
 
 export async function generateSchedule(
