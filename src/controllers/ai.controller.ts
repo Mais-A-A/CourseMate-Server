@@ -1,6 +1,15 @@
 import type { Request, Response } from 'express'
-import { getAdvisorResponseStream } from '../ai/advisor.service.js'
+import { classifyIntent, Intent } from '../ai/intentClassifier.js'
+import { hasPendingSchedule, getOrCreateSession } from '../services/session.service.js'
+import { handleAdvisorRequestStream } from '../ai/advisor.service.js'
 import { generateSchedule } from '../ai/schedule.generator.js'
+import {
+  startScheduleFlowStream,
+  continuePendingScheduleStream,
+} from '../ai/schedule.flow.js'
+import { handleGeneralQuestionStream } from '../services/knowledgeBase.service.js'
+import { geminiModel } from '../config/gemini.js'
+import { parseModelResponseContent } from '../shared/utils/AIUtils.js'
 import { verifyJWT } from '../shared/utils/authUtils.js'
 import { AISchedule } from '../models/aiSchedule.model.js'
 
@@ -34,7 +43,43 @@ export async function chat(req: Request, res: Response) {
   const { message, sessionId } = req.body
 
   try {
-    const stream = await getAdvisorResponseStream(sessionId, studentId, message)
+    let stream: AsyncGenerator<string>
+
+    if (hasPendingSchedule(sessionId)) {
+      stream = continuePendingScheduleStream(sessionId, studentId, message)
+    } else {
+      const [intent] = await Promise.all([
+        classifyIntent(message).catch(() => Intent.OTHER),
+        getOrCreateSession(sessionId, studentId),
+      ])
+
+      console.log(`[Chat] intent="${intent}" session="${sessionId}"`)
+
+      switch (intent) {
+        case Intent.GENERATE_SCHEDULE:
+          stream = startScheduleFlowStream(sessionId, studentId, message)
+          break
+        case Intent.ADVISOR_REQUEST:
+          stream = handleAdvisorRequestStream(sessionId, studentId, message)
+          break
+        case Intent.GENERAL_UNI_QUESTION:
+          stream = handleGeneralQuestionStream(sessionId, studentId, message)
+          break
+        case Intent.GREETING:
+          stream = (async function* () {
+            yield 'أهلاً وسهلاً! 👋 أنا CourseMate، مساعدك الأكاديمي في جامعة بوليتكنك فلسطين.\nيمكنني مساعدتك في:\n- 📅 إنشاء جدولك الدراسي\n- 📚 الإجابة على أسئلتك حول الجامعة\n- 🎓 معلومات وضعك الأكاديمي\n\nكيف يمكنني مساعدتك اليوم؟'
+          })()
+          break
+        default:
+          stream = (async function* () {
+            const result = await geminiModel.invoke(
+              `The student sent: "${message}"\nRespond in the SAME LANGUAGE as the student's message. Tell them in ONE short sentence that you can only assist with academic matters at Palestine Polytechnic University (PPU).`,
+            )
+            yield parseModelResponseContent(result.content)
+          })()
+      }
+    }
+
     for await (const chunk of stream) {
       res.write(`data: ${JSON.stringify({ text: chunk })}\n\n`)
     }

@@ -17,6 +17,7 @@ const envSchema = z.object({
   CLIENT_URL: z.string(),
   USE_REAL: z.string().optional(),
   GEMINI_API_KEY: z.string(),
+  GEMINI_EMBEDDING_KEY: z.string(),
 })
 
 const parsedEnv = envSchema.parse(process.env)
