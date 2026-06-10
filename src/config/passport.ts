@@ -15,7 +15,7 @@ passport.use(
       clientSecret: envVars.CLIENT_SECRET,
       callbackURL:
         envVars.NODE_ENV === 'production'
-          ? 'https://coursemate.xyz/'
+          ? 'https://coursemate.xyz/auth/google/callback'
           : envVars.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
