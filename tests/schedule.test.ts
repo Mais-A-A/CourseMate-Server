@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import mongoose from 'mongoose'
-import { scheduleService } from '../src/services/schedule.service.js'
-import { Schedule } from '../src/models/schedule.model.js'
-import type { Schedule as ScheduleType } from '../src/schemas/schedule.schema.js'
+import { scheduleService } from '../src/features/schedule/schedule.service.js'
+import { Schedule } from '../src/features/schedule/schedule.model.js'
+import type { Schedule as ScheduleType } from '../src/features/schedule/schedule.schema.js'
 
 describe('Schedule Service', () => {
   beforeEach(async () => {

@@ -1,9 +1,9 @@
-import { academicPlanService } from '../src/services/academicPlan.service.js'
+import { academicPlanService } from '../src/features/academic-plan/academicPlan.service.js'
 import { describe, it, expect } from 'vitest'
 import request from 'supertest'
 import app from '../app.js'
 import env from '../env.js'
-import type { AcademicPlan } from '../src/schemas/academicPlan.schema.js'
+import type { AcademicPlan } from '../src/features/academic-plan/academicPlan.schema.js'
 
 if (env.USE_REAL !== 'true') {
   describe('AcademicPlanService', () => {

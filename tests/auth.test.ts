@@ -20,7 +20,7 @@ vi.mock('passport', () => ({
   },
 }))
 
-import authRouter from '../src/routes/auth.route.js'
+import authRouter from '../src/features/auth/auth.routes.js'
 import passport from 'passport'
 
 const app = express()
