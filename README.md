@@ -1,6 +1,6 @@
 # CourseMate Server
 
-> **The backend API powering CourseMate — an intelligent academic advising platform for universities.**
+> The backend API powering CourseMate — an intelligent academic advising platform for universities.
 >
 > [![Live API](https://img.shields.io/badge/Live%20API-coursemate--server--3a4x.onrender.com-brightgreen?style=flat-square)](https://coursemate-server-3a4x.onrender.com/)
 > [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
@@ -40,9 +40,9 @@
 >
 > | Environment | URL |
 > |-------------|-----|
-> | 🚀 **Production API** | [https://coursemate-server-3a4x.onrender.com](https://coursemate-server-3a4x.onrender.com) |
-> | 📖 **Swagger UI Docs** | [https://coursemate-server-3a4x.onrender.com/api-docs](https://coursemate-server-3a4x.onrender.com/api-docs) |
-> | 🌐 **Frontend App** | [https://coursemate.xyz](https://coursemate.xyz) |
+> | Production API | [https://coursemate-server-3a4x.onrender.com](https://coursemate-server-3a4x.onrender.com) |
+> | Swagger UI Docs | [https://coursemate-server-3a4x.onrender.com/api-docs](https://coursemate-server-3a4x.onrender.com/api-docs) |
+> | Frontend App | [https://coursemate.xyz](https://coursemate.xyz) |
 >
 > ---
 >
@@ -85,17 +85,17 @@
 >
 > ## Features
 >
-> - 🔐 **Authentication & Authorization** — JWT-based auth with Google OAuth 2.0 SSO support and role-based access control (Student, Supervisor, Admin)
-> - - 📚 **Course Management** — Full CRUD for courses, sections, departments, and enrollment
->   - - 🗓️ **Academic Planning** — Personalized academic plan generation and management per student
->     - - ⚠️ **Academic Warnings** — Automated detection and management of students at academic risk
->       - - 📅 **Important Dates** — University-wide important dates and deadlines management
->         - - 📊 **Analytics & Reports** — Aggregated statistics and performance reports for admins and supervisors
->           - - 🔔 **Notifications** — Real-time notification system for students and staff
->             - - 🤖 **AI Recommendations** — LLM-powered course recommendations tailored to each student's academic history
->               - - 🧠 **AI Chat (RAG)** — Retrieval-Augmented Generation assistant trained on university documents (PDFs)
->                 - - 📖 **Knowledge Base** — Document upload and management to feed the RAG pipeline
->                   - - 🗃️ **Schedule Management** — Weekly schedule generation and conflict detection
+> - **Authentication & Authorization** — JWT-based auth with Google OAuth 2.0 SSO support and role-based access control (Student, Supervisor, Admin)
+> - - **Course Management** — Full CRUD for courses, sections, departments, and enrollment
+>   - - **Academic Planning** — Personalized academic plan generation and management per student
+>     - - **Academic Warnings** — Automated detection and management of students at academic risk
+>       - - **Important Dates** — University-wide important dates and deadlines management
+>         - - **Analytics & Reports** — Aggregated statistics and performance reports for admins and supervisors
+>           - - **Notifications** — Real-time notification system for students and staff
+>             - - **AI Recommendations** — LLM-powered course recommendations tailored to each student's academic history
+>               - - **AI Chat (RAG)** — Retrieval-Augmented Generation assistant trained on university documents (PDFs)
+>                 - - **Knowledge Base** — Document upload and management to feed the RAG pipeline
+>                   - - **Schedule Management** — Weekly schedule generation and conflict detection
 >                    
 >                     - ---
 >
@@ -232,60 +232,54 @@
 >
 > The API is fully documented with **Swagger / OpenAPI 3.0**.
 >
-> > 📖 Access the interactive docs at: [https://coursemate-server-3a4x.onrender.com/api-docs](https://coursemate-server-3a4x.onrender.com/api-docs)
-> >
-> > When running locally, visit: `http://localhost:5000/api-docs`
-> >
-> > ---
-> >
-> > ## Project Structure
-> >
-> > ```
-> > CourseMate-Server/
-> > ├── src/
-> > │   ├── config/                  # DB connection, env config
-> > │   ├── features/
-> > │   │   ├── academic-plan/
-> > │   │   ├── academic-rule/
-> > │   │   ├── academic-warning/
-> > │   │   ├── ai/
-> > │   │   ├── ai-recommendation/
-> > │   │   ├── analytics/
-> > │   │   ├── auth/
-> > │   │   ├── course/
-> > │   │   ├── course-section/
-> > │   │   ├── department/
-> > │   │   ├── important-dates/
-> > │   │   ├── knowledge-base/
-> > │   │   ├── notification/
-> > │   │   ├── schedule/
-> > │   │   └── user/
-> > │   ├── shared/
-> > │   │   ├── middlewares/
-> > │   │   ├── types/
-> > │   │   └── utils/
-> > │   └── seed.ts
-> > ├── tests/
-> > ├── app.ts                       # Express app setup
-> > ├── index.ts                     # Server entry point
-> > ├── swagger.ts                   # Swagger configuration
-> > ├── tsconfig.json
-> > ├── vitest.config.ts
-> > └── package.json
-> > ```
-> >
-> > ---
-> >
-> > ## Contributors
-> >
-> > | Name | GitHub |
-> > |------|--------|
-> > | Mais Arafeh | [@Mais-A-A](https://github.com/Mais-A-A) |
-> > | Hasan Al-Saafin | [@HasanAlsaafen](https://github.com/HasanAlsaafen) |
-> > | Hasan Alsaafin | [@Hasan2005-CS](https://github.com/Hasan2005-CS) |
-> >
-> > ---
-> >
-> > <p align="center">
-  Made with ❤️ by the CourseMate Team · <a href="https://coursemate.xyz">coursemate.xyz</a>
-  </p>
+> Access the interactive docs at: [https://coursemate-server-3a4x.onrender.com/api-docs](https://coursemate-server-3a4x.onrender.com/api-docs)
+>
+> When running locally, visit: `http://localhost:5000/api-docs`
+>
+> ---
+>
+> ## Project Structure
+>
+> ```
+> CourseMate-Server/
+> ├── src/
+> │   ├── config/                  # DB connection, env config
+> │   ├── features/
+> │   │   ├── academic-plan/
+> │   │   ├── academic-rule/
+> │   │   ├── academic-warning/
+> │   │   ├── ai/
+> │   │   ├── ai-recommendation/
+> │   │   ├── analytics/
+> │   │   ├── auth/
+> │   │   ├── course/
+> │   │   ├── course-section/
+> │   │   ├── department/
+> │   │   ├── important-dates/
+> │   │   ├── knowledge-base/
+> │   │   ├── notification/
+> │   │   ├── schedule/
+> │   │   └── user/
+> │   ├── shared/
+> │   │   ├── middlewares/
+> │   │   ├── types/
+> │   │   └── utils/
+> │   └── seed.ts
+> ├── tests/
+> ├── app.ts                       # Express app setup
+> ├── index.ts                     # Server entry point
+> ├── swagger.ts                   # Swagger configuration
+> ├── tsconfig.json
+> ├── vitest.config.ts
+> └── package.json
+> ```
+>
+> ---
+>
+> ## Contributors
+>
+> | Name | GitHub |
+> |------|--------|
+> | Mais Arafeh | [@Mais-A-A](https://github.com/Mais-A-A) |
+> | Hasan Al-Saafin | [@HasanAlsaafen](https://github.com/HasanAlsaafen) |
+> | Hasan Alsaafin | [@Hasan2005-CS](https://github.com/Hasan2005-CS) |
