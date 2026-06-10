@@ -22,7 +22,7 @@ export function detectRole(email: string): UserRole {
   const localPart = email.trim().toLocaleLowerCase().split('@')[0]!
 
   if (isUniversityEmail(email)) {
-    if (localPart == 'jabary980') {
+    if (localPart == 'jabary980' || localPart=='221154') {
       return 'admin'
     } else if (/^\d+$/.test(localPart!)) {
       return 'student'
