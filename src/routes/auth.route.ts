@@ -53,7 +53,7 @@ authRouter.get(
         sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .redirect(`https://coursemate.xyz/dashboard`)
+.redirect(`${envVars.CLIENT_URL}/dashboard`)
   },
 )
 
