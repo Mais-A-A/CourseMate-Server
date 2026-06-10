@@ -45,10 +45,6 @@ authRouter.get(
   (req: Request, res: Response) => {
     const user = req.user as UniversityUser
     const token = generateJWT(user)
-     const frontendURL =
-        process.env.NODE_ENV === 'production'
-          ? 'https://coursemate.xyz'
-          : 'http://localhost:5173'
 
     res
       .cookie('token', token, {
@@ -57,7 +53,7 @@ authRouter.get(
         sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .redirect(`${frontendURL}/dashboard`)
+      .redirect(`https://coursemate.xyz/dashboard`)
   },
 )
 
