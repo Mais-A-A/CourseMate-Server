@@ -49,7 +49,7 @@ export async function ingestDocument(
   const embeddings = await generateEmbeddings(chunks)
 
   // Step 4: Save chunks + embeddings to MongoDB
-  const documents = chunks.map((chunk, i) => ({
+  const documents = chunks.map((chunk: string, i: number) => ({
     text: chunk,
     embedding: embeddings[i],
     source: filename,
