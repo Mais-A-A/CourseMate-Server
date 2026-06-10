@@ -213,5 +213,6 @@ router.get('/schedule/approved', requireAuth(), getApprovedScheduleHandler)
  *         description: Unauthorized
  */
 router.get('/schedule/history', requireAuth(), getScheduleHistoryHandler)
+router.get('/schedule/student/:studentNo', requireAuth(), getStudentScheduleHandler)
 
 export default router
