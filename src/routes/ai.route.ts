@@ -6,6 +6,7 @@ import {
   approveScheduleHandler,
   getApprovedScheduleHandler,
   getScheduleHistoryHandler,
+  getStudentScheduleHandler,
 } from '../controllers/ai.controller.js'
 import { requireAuth } from '../middlewares/auth.middleware.js'
 import {
