@@ -53,7 +53,7 @@ authRouter.get(
         sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-.redirect(`${envVars.CLIENT_URL}/dashboard`)
+      .redirect(`${envVars.CLIENT_URL}/dashboard#token=${token}`)
   },
 )
 
@@ -97,7 +97,7 @@ authRouter.post('/logout', requireAuth(), (req: Request, res: Response) => {
  *         description: Unauthorized or expired session
  */
 authRouter.get('/me', async (req: Request, res: Response) => {
-  const token = req.cookies.token
+  const token = req.cookies.token || req.headers.authorization?.split(' ')[1]
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' })
   }
