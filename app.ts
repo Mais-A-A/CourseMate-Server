@@ -31,6 +31,7 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 )
 app.use(morgan('dev'))
