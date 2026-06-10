@@ -23,7 +23,7 @@ export function detectRole(email: string): UserRole {
 
   if (isUniversityEmail(email)) {
     if (localPart == 'jabary980' || localPart=='221154' || localPart =='221141') {
-      return 'admin'
+      return 'supervisor'
     } else if (/^\d+$/.test(localPart!)) {
       return 'student'
     }
