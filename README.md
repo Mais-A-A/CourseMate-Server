@@ -14,17 +14,17 @@
 >
 > - [Overview](#overview)
 > - [Live Deployment](#live-deployment)
->   - - [Tech Stack](#tech-stack)
->     - - [Architecture](#architecture)
->       - - [Features](#features)
->         - - [API Modules](#api-modules)
->           - - [Getting Started](#getting-started)
->             - - [Environment Variables](#environment-variables)
->               - - [Scripts](#scripts)
->                 - - [Testing](#testing)
->                   - - [API Documentation](#api-documentation)
->                     - - [Project Structure](#project-structure)
->                       - - [Contributors](#contributors)
+> - [Tech Stack](#tech-stack)
+> - [Architecture](#architecture)
+> - [Features](#features)
+> - [API Modules](#api-modules)
+> - [Getting Started](#getting-started)
+> - [Environment Variables](#environment-variables)
+> - [Scripts](#scripts)
+> - [Testing](#testing)
+> - [API Documentation](#api-documentation)
+> - [Project Structure](#project-structure)
+> - [Contributors](#contributors)
 >                        
 >                         - ---
 >
