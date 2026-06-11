@@ -96,7 +96,7 @@
 > - - **Knowledge Base** — Document upload and management to feed the RAG pipeline
 > - - **Schedule Management** — Weekly schedule generation and conflict detection
 >                    
->                     - ---
+>  ---
 >
 > ## API Modules
 >
