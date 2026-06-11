@@ -86,15 +86,15 @@
 >
 > - **Authentication & Authorization** — JWT-based auth with Google OAuth 2.0 SSO support and role-based access control (Student, Supervisor, Admin)
 > - - **Course Management** — Full CRUD for courses, sections, departments, and enrollment
->   - - **Academic Planning** — Personalized academic plan generation and management per student
->     - - **Academic Warnings** — Automated detection and management of students at academic risk
->       - - **Important Dates** — University-wide important dates and deadlines management
->         - - **Analytics & Reports** — Aggregated statistics and performance reports for admins and supervisors
->           - - **Notifications** — Real-time notification system for students and staff
->             - - **AI Recommendations** — LLM-powered course recommendations tailored to each student's academic history
->               - - **AI Chat (RAG)** — Retrieval-Augmented Generation assistant trained on university documents (PDFs)
->                 - - **Knowledge Base** — Document upload and management to feed the RAG pipeline
->                   - - **Schedule Management** — Weekly schedule generation and conflict detection
+> - - **Academic Planning** — Personalized academic plan generation and management per student
+> - - **Academic Warnings** — Automated detection and management of students at academic risk
+> - - **Important Dates** — University-wide important dates and deadlines management
+> - - **Analytics & Reports** — Aggregated statistics and performance reports for admins and supervisors
+> - - **Notifications** — Real-time notification system for students and staff
+> - - **AI Recommendations** — LLM-powered course recommendations tailored to each student's academic history
+> - - **AI Chat (RAG)** — Retrieval-Augmented Generation assistant trained on university documents (PDFs)
+> - - **Knowledge Base** — Document upload and management to feed the RAG pipeline
+> - - **Schedule Management** — Weekly schedule generation and conflict detection
 >                    
 >                     - ---
 >
@@ -126,8 +126,8 @@
 >
 > - Node.js >= 18
 > - - MongoDB instance (local or Atlas)
->   - - Google OAuth credentials (for SSO)
->     - - Google Generative AI API key (for AI features)
+> - - Google OAuth credentials (for SSO)
+> - - Google Generative AI API key (for AI features)
 >      
 >       - ### Installation
 >      
