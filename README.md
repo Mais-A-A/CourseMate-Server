@@ -26,7 +26,7 @@
 > - [Project Structure](#project-structure)
 > - [Contributors](#contributors)
 >                        
->                         - ---
+>                         ---
 >
 > ## Overview
 >
