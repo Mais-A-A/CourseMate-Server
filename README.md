@@ -13,7 +13,7 @@
 > ## Table of Contents
 >
 > - [Overview](#overview)
-> - - [Live Deployment](#live-deployment)
+> - [Live Deployment](#live-deployment)
 >   - - [Tech Stack](#tech-stack)
 >     - - [Architecture](#architecture)
 >       - - [Features](#features)
@@ -235,6 +235,7 @@
 > Access the interactive docs at: [https://coursemate-server-3a4x.onrender.com/api-docs](https://coursemate-server-3a4x.onrender.com/api-docs)
 >
 > When running locally, visit: `http://localhost:5000/api-docs`
+> > Documentation: [Google Drive Doc](https://drive.google.com/file/d/1fdbXbw_ahQhEbUQrTpUfUb1vS_rLrTSG/view?usp=sharing)
 >
 > ---
 >
