@@ -25,9 +25,8 @@
 > - [API Documentation](#api-documentation)
 > - [Project Structure](#project-structure)
 > - [Contributors](#contributors)
->                        
->                         ---
 >
+> ---
 > ## Overview
 >
 > CourseMate Server is a RESTful API built with **Node.js**, **Express 5**, **TypeScript**, and **MongoDB**. It serves as the backbone of the CourseMate academic platform, managing student data, course registration, AI-powered recommendations, academic plans, schedules, notifications, and more.
