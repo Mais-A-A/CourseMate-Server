@@ -1,5 +1,5 @@
-import { academicWarningService } from '../src/services/academicWarning.service.js'
-import type { AcademicWarning } from '../src/schemas/academicWarning.schema.js'
+import { academicWarningService } from '../src/features/academic-warning/academicWarning.service.js'
+import type { AcademicWarning } from '../src/features/academic-warning/academicWarning.schema.js'
 import { describe, it, expect } from 'vitest'
 import env from '../env.js'
 import request from 'supertest'

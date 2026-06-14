@@ -1,5 +1,5 @@
-import { courseService } from '../src/services/course.service.js'
-import type { Course } from '../src/schemas/course.schema.js'
+import { courseService } from '../src/features/course/course.service.js'
+import type { Course } from '../src/features/course/course.schema.js'
 import { describe, it, expect } from 'vitest'
 import env from '../env.js'
 import request from 'supertest'

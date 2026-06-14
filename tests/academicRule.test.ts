@@ -1,4 +1,4 @@
-import { academicRuleService } from '../src/services/academicRule.service.js'
+import { academicRuleService } from '../src/features/academic-rule/academicRule.service.js'
 import { describe, it, expect } from 'vitest'
 import request from 'supertest'
 import app from '../app.js'

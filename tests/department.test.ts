@@ -1,5 +1,5 @@
-import { departmentService } from '../src/services/department.service.js'
-import type { Department } from '../src/schemas/department.schema.js'
+import { departmentService } from '../src/features/department/department.service.js'
+import type { Department } from '../src/features/department/department.schema.js'
 import { describe, it, expect } from 'vitest'
 import env from '../env.js'
 import request from 'supertest'

@@ -1,6 +1,6 @@
-import { userService } from '../src/services/user.service.js'
+import { userService } from '../src/features/user/user.service.js'
 import { describe, it, expect, beforeAll } from 'vitest'
-import type { User, StudentData } from '../src/schemas/user.schemas.js'
+import type { User, StudentData } from '../src/features/user/user.schemas.js'
 import env from '../env.js'
 import request from 'supertest'
 import app from '../app.js'

@@ -1,22 +1,22 @@
-import express from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import { connectDatabase } from './src/config/db.js'
 import cookieParser from 'cookie-parser'
 import passport from './src/config/passport.js'
-import authRouter from './src/routes/auth.route.js'
-import { userRouter } from './src/routes/user.routes.js'
-import { notificationRouter } from './src/routes/notification.routes.js'
-import { academicWarningRouter } from './src/routes/academicWarning.routes.js'
-import { academicRuleRouter } from './src/routes/academicRule.routes.js'
-import { academicPlanRouter } from './src/routes/academicPlan.routes.js'
-import { aiRecomendationRouter } from './src/routes/AIRecomendation.routes.js'
-import { courseRouter } from './src/routes/course.routes.js'
-import { courseSectionRouter } from './src/routes/courseSection.routes.js'
-import { departmentRouter } from './src/routes/department.routes.js'
-import { scheduleRouter } from './src/routes/schedule.routes.js'
-import { importantDatesRouter } from './src/routes/importantDates.routes.js'
-import { analyticsRouter } from './src/routes/analytics.routes.js'
-import aiRoutes from './src/routes/ai.route.js'
-import knowledgeBaseRouter from './src/routes/knowledgeBase.route.js'
+import authRouter from './src/features/auth/auth.routes.js'
+import { userRouter } from './src/features/user/user.routes.js'
+import { notificationRouter } from './src/features/notification/notification.routes.js'
+import { academicWarningRouter } from './src/features/academic-warning/academicWarning.routes.js'
+import { academicRuleRouter } from './src/features/academic-rule/academicRule.routes.js'
+import { academicPlanRouter } from './src/features/academic-plan/academicPlan.routes.js'
+import { aiRecomendationRouter } from './src/features/ai-recommendation/AIRecomendation.routes.js'
+import { courseRouter } from './src/features/course/course.routes.js'
+import { courseSectionRouter } from './src/features/course-section/courseSection.routes.js'
+import { departmentRouter } from './src/features/department/department.routes.js'
+import { scheduleRouter } from './src/features/schedule/schedule.routes.js'
+import { importantDatesRouter } from './src/features/important-dates/importantDates.routes.js'
+import { analyticsRouter } from './src/features/analytics/analytics.routes.js'
+import aiRoutes from './src/features/ai/ai.routes.js'
+import knowledgeBaseRouter from './src/features/knowledge-base/knowledgeBase.routes.js'
 import morgan from 'morgan'
 import cors from 'cors'
 
@@ -59,6 +59,16 @@ app.use('/department', departmentRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/analytics', analyticsRouter)
 app.use('/knowledge-base', knowledgeBaseRouter)
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error & { status?: number; type?: string }, req: Request, res: Response, _next: NextFunction) => {
+  const status = (err as { status?: number }).status ?? 500
+  if (err.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'Invalid JSON in request body' })
+    return
+  }
+  res.status(status).json({ error: err.message || 'Internal Server Error' })
+})
 
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase().catch((err) => {

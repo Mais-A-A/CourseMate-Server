@@ -1,8 +1,8 @@
-import { importantDatesService } from '../src/services/importantDates.service.js'
+import { importantDatesService } from '../src/features/important-dates/importantDates.service.js'
 import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
 import express from 'express'
-import type { ImportantDateType } from '../src/schemas/importantDates.schema.js'
+import type { ImportantDateType } from '../src/features/important-dates/importantDates.schema.js'
 if (process.env.USE_REAL !== 'true') {
   describe('Important Dates Unit tests', () => {
     const importnatDate: ImportantDateType = {
