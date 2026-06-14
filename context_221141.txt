@@ -309,4 +309,6 @@ None
 
 ## AI-Generated Schedule
 
-None
+- Academic Year: 2025 | Semester: 1 | Total Credit Hours: 3 | Status: pending
+  Sections:
+    - لغة عربية (Course No: 4001, Section: 9, Credit Hours: 3, Time: 15:00_15:50 (الاحد, الثلاثاء, الخميس), Room: 003 (مدرج بلال عمرو), Building: وادي الهرية C, Supervisor: جهاد علي محمد العدرة, Capacity: 40, Enrolled: 0, Open: Yes, Package: A, Reason: هذا المساق من متطلبات الجامعة الإجبارية وهو متاح للتسجيل.)
