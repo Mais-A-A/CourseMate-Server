@@ -7,6 +7,7 @@ import {
   getOrCreateSession,
   type PendingSchedule,
 } from './session.service.js'
+import { AISchedule } from './aiSchedule.model.js'
 
 function extractScheduleParams(
   message: string,
@@ -28,6 +29,11 @@ function extractScheduleParams(
   if (acdYear !== undefined) result.acdYear = acdYear
   if (semesterNo !== undefined) result.semesterNo = semesterNo
   return result
+}
+
+async function savePendingSchedule(userId: string, schedule: GeneratedSchedule): Promise<void> {
+  await AISchedule.deleteMany({ studentNo: userId, status: 'pending' })
+  await AISchedule.create({ ...schedule, studentNo: userId, status: 'pending' })
 }
 
 function formatScheduleResponse(schedule: GeneratedSchedule): string {
@@ -79,6 +85,7 @@ export async function* continuePendingScheduleStream(
         semesterNo: pending.semesterNo!,
         preferences: preferences || undefined,
       })
+      await savePendingSchedule(userId, schedule)
       const formatted = formatScheduleResponse(schedule)
       session.history.push(new HumanMessage(message), new AIMessage(formatted))
       yield formatted
@@ -129,6 +136,7 @@ export async function* continuePendingScheduleStream(
         semesterNo: params.semesterNo!,
         preferences,
       })
+      await savePendingSchedule(userId, schedule)
       const formatted = formatScheduleResponse(schedule)
       session.history.push(new HumanMessage(message), new AIMessage(formatted))
       yield formatted
