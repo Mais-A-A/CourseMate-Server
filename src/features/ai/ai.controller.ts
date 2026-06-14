@@ -189,24 +189,11 @@ export async function generateScheduleHandler(
 
   const { acdYear, semesterNo, preferences } = req.body
 
-  if (!acdYear || !semesterNo) {
-    res.status(400).json({ error: 'acdYear and semesterNo are required' })
-    return
-  }
-
-  const parsedYear = Number(acdYear)
-  const parsedSemester = Number(semesterNo)
-
-  if (isNaN(parsedYear) || isNaN(parsedSemester)) {
-    res.status(400).json({ error: 'acdYear and semesterNo must be numbers' })
-    return
-  }
-
   try {
     const schedule = await generateSchedule({
       userId: studentId,
-      acdYear: parsedYear,
-      semesterNo: parsedSemester,
+      acdYear,
+      semesterNo,
       preferences: typeof preferences === 'string' ? preferences : undefined,
     })
 

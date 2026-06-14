@@ -6,8 +6,8 @@ export const ChatSchema = z.object({
 })
 
 export const GenerateScheduleSchema = z.object({
-  acdYear: z.coerce.number(),
-  semesterNo: z.coerce.number(),
+  acdYear: z.coerce.number().optional().default(2025),
+  semesterNo: z.coerce.number().optional().default(2),
   preferences: z.string().max(500).optional(),
 })
 

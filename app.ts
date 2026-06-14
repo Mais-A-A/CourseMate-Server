@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import { connectDatabase } from './src/config/db.js'
 import cookieParser from 'cookie-parser'
 import passport from './src/config/passport.js'
@@ -59,6 +59,16 @@ app.use('/department', departmentRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/analytics', analyticsRouter)
 app.use('/knowledge-base', knowledgeBaseRouter)
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error & { status?: number; type?: string }, req: Request, res: Response, _next: NextFunction) => {
+  const status = (err as { status?: number }).status ?? 500
+  if (err.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'Invalid JSON in request body' })
+    return
+  }
+  res.status(status).json({ error: err.message || 'Internal Server Error' })
+})
 
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase().catch((err) => {
