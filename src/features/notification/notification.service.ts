@@ -19,7 +19,7 @@ class NotificationService {
     return await Notification.findByIdAndUpdate(
       notificationId,
       { isRead: true },
-      { new: true },
+      { returnDocument: 'after' },
     )
   }
 

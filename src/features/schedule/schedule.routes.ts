@@ -1,8 +1,11 @@
+import {
+  ownerOfSchedule,
+} from '../../shared/middlewares/ownership.js'
 import { Router } from 'express'
 import { scheduleController } from './schedule.controller.js'
 import { ScheduleSchema } from './schedule.schema.js'
 import { validateRequest } from '../../shared/middlewares/validation.js'
-import { requireAuth, requireRole } from '../../shared/middlewares/auth.middleware.js'
+import { requireAuth, requireRole, requireSelfOrStaff } from '../../shared/middlewares/auth.middleware.js'
 const scheduleRouter = Router()
 
 /**
@@ -67,7 +70,12 @@ const scheduleRouter = Router()
  *       401:
  *         description: Unauthorized
  */
-scheduleRouter.get('/', requireAuth(), scheduleController.getSchedules)
+scheduleRouter.get(
+  '/',
+  requireAuth(),
+  requireRole('admin'),
+  scheduleController.getSchedules,
+)
 
 /**
  * @swagger
@@ -97,7 +105,12 @@ scheduleRouter.get('/', requireAuth(), scheduleController.getSchedules)
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.get('/:id', requireAuth(), scheduleController.getScheduleById)
+scheduleRouter.get(
+  '/:id',
+  requireAuth(),
+  requireSelfOrStaff(ownerOfSchedule),
+  scheduleController.getScheduleById,
+)
 
 /**
  * @swagger
@@ -130,6 +143,7 @@ scheduleRouter.get('/:id', requireAuth(), scheduleController.getScheduleById)
 scheduleRouter.post(
   '/',
   requireAuth(),
+  requireRole('admin'),
   validateRequest(ScheduleSchema),
   scheduleController.createSchedule,
 )
@@ -173,6 +187,7 @@ scheduleRouter.post(
 scheduleRouter.put(
   '/:id',
   requireAuth(),
+  requireRole('admin'),
   validateRequest(ScheduleSchema),
   scheduleController.updateSchedule,
 )
@@ -201,7 +216,12 @@ scheduleRouter.put(
  *       404:
  *         description: Schedule not found
  */
-scheduleRouter.delete('/:id', requireAuth(), scheduleController.deleteSchedule)
+scheduleRouter.delete(
+  '/:id',
+  requireAuth(),
+  requireRole('admin'),
+  scheduleController.deleteSchedule,
+)
 
 export { scheduleRouter }
 export default scheduleRouter

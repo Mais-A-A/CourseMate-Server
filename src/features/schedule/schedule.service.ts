@@ -16,7 +16,7 @@ class ScheduleService {
   }
 
   async updateSchedule(scheduleId: string, scheduleData: Partial<ScheduleType>) {
-    return await Schedule.findByIdAndUpdate(scheduleId, scheduleData, { new: true })
+    return await Schedule.findByIdAndUpdate(scheduleId, scheduleData, { returnDocument: 'after' })
   }
 
   async deleteSchedule(scheduleId: string) {

@@ -1,3 +1,4 @@
+import { userService } from './user.service.js'
 import { userController } from './user.controller.js'
 import { Router } from 'express'
 import { userSchema } from './user.schemas.js'
@@ -6,6 +7,8 @@ import {
   requireAuth,
   requireRole,
   requireAuthorizeUserOrHigher,
+  requireSelfOrStaff,
+  requireOwnSupervisorQuery,
 } from '../../shared/middlewares/auth.middleware.js'
 const userRouter = Router()
 
@@ -115,7 +118,12 @@ const userRouter = Router()
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/', requireAuth(), userController.getAllUsers)
+userRouter.get(
+  '/',
+  requireAuth(),
+  requireRole('admin'),
+  userController.getAllUsers,
+)
 
 /**
  * @swagger
@@ -155,6 +163,8 @@ userRouter.get('/', requireAuth(), userController.getAllUsers)
 userRouter.get(
   '/supervisor',
   requireAuth(),
+  requireRole('supervisor'),
+  requireOwnSupervisorQuery(),
   userController.getUserBySupervisorEmail,
 )
 /**
@@ -226,7 +236,12 @@ userRouter.get(
  *       500:
  *         description: Internal server error
  */
-userRouter.get('/:id', requireAuth(), userController.getUserById)
+userRouter.get(
+  '/:id',
+  requireAuth(),
+  requireSelfOrStaff((req) => userService.getEmailById(String(req.params.id))),
+  userController.getUserById,
+)
 
 /**
  * @swagger

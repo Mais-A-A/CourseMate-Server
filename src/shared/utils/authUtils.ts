@@ -18,11 +18,22 @@ export function isUniversityEmail(email: string): boolean {
   )
 }
 
+// Bootstrap admins (comma-separated university ids/usernames in ADMIN_USERS). Everyone else's role comes
+// from their User record in the database, so admins can be added or removed without a deploy.
+export function isBootstrapAdmin(email: string): boolean {
+  const localPart = email.trim().toLowerCase().split('@')[0]!
+  const admins = (process.env.ADMIN_USERS ?? '221141')
+    .split(',')
+    .map((a) => a.trim().toLowerCase())
+    .filter(Boolean)
+  return admins.includes(localPart)
+}
+
 export function detectRole(email: string): UserRole {
   const localPart = email.trim().toLocaleLowerCase().split('@')[0]!
 
   if (isUniversityEmail(email)) {
-    if (localPart == 'jabary980') { 
+    if (isBootstrapAdmin(email)) {
       return 'admin'
     } else if (/^\d+$/.test(localPart!)) {
       return 'student'

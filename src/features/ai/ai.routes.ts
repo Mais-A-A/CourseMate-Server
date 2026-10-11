@@ -7,13 +7,23 @@ import {
   getApprovedScheduleHandler,
   getScheduleHistoryHandler,
   getStudentScheduleHandler,
+  listSessionsHandler,
+  getSessionHandler,
+  renameSessionHandler,
+  deleteSessionHandler,
 } from './ai.controller.js'
 import { requireAuth } from '../../shared/middlewares/auth.middleware.js'
 import {
   ChatSchema,
   GenerateScheduleSchema,
   GenerateScheduleForStudentSchema,
+  RenameSessionSchema,
 } from './ai.schema.js'
+import {
+  chatBurstLimiter,
+  chatDailyLimiter,
+  scheduleLimiter,
+} from '../../shared/middlewares/rateLimit.js'
 import { validateRequest } from '../../shared/middlewares/validation.js'
 
 const router = Router()
@@ -52,8 +62,17 @@ const router = Router()
  *         description: Validation error
  *       401:
  *         description: Unauthorized
+ *       429:
+ *         description: "Rate limited. Body: { error, retryAfter (seconds) }. Limits: 10 messages/min and 150/day per user."
  */
-router.post('/chat', validateRequest(ChatSchema), requireAuth(), chat)
+router.post(
+  '/chat',
+  validateRequest(ChatSchema),
+  requireAuth(),
+  chatBurstLimiter,
+  chatDailyLimiter,
+  chat,
+)
 
 /**
  * @swagger
@@ -96,6 +115,7 @@ router.post(
   '/schedule/generate',
   validateRequest(GenerateScheduleSchema),
   requireAuth(),
+  scheduleLimiter,
   generateScheduleHandler,
 )
 
@@ -146,6 +166,7 @@ router.post(
   '/schedule/generate/student',
   validateRequest(GenerateScheduleForStudentSchema),
   requireAuth(),
+  scheduleLimiter,
   generateScheduleForStudentHandler,
 )
 /**
@@ -214,5 +235,71 @@ router.get('/schedule/approved', requireAuth(), getApprovedScheduleHandler)
  */
 router.get('/schedule/history', requireAuth(), getScheduleHistoryHandler)
 router.get('/schedule/student/:studentNo', requireAuth(), getStudentScheduleHandler)
+
+/**
+ * @swagger
+ * /ai/sessions:
+ *   get:
+ *     tags: [AI]
+ *     summary: List the current student's saved chat sessions (newest first)
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: "data[]: { sessionId, title, lastMessageAt, createdAt, messageCount, lastMessage }"
+ */
+router.get('/sessions', requireAuth(), listSessionsHandler)
+
+/**
+ * @swagger
+ * /ai/sessions/{sessionId}:
+ *   get:
+ *     tags: [AI]
+ *     summary: Get a saved chat session with all its messages
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: sessionId, required: true, schema: { type: string } }
+ *     responses:
+ *       200:
+ *         description: "data: { sessionId, title, messages: [{role, content, createdAt}], pendingSchedule }"
+ *       404:
+ *         description: Session not found
+ *   patch:
+ *     tags: [AI]
+ *     summary: Rename a chat session
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: sessionId, required: true, schema: { type: string } }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title]
+ *             properties:
+ *               title: { type: string, maxLength: 100 }
+ *     responses:
+ *       200:
+ *         description: Renamed
+ *   delete:
+ *     tags: [AI]
+ *     summary: Delete a chat session
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: sessionId, required: true, schema: { type: string } }
+ *     responses:
+ *       200:
+ *         description: Deleted
+ *       404:
+ *         description: Session not found
+ */
+router.get('/sessions/:sessionId', requireAuth(), getSessionHandler)
+router.patch(
+  '/sessions/:sessionId',
+  validateRequest(RenameSessionSchema),
+  requireAuth(),
+  renameSessionHandler,
+)
+router.delete('/sessions/:sessionId', requireAuth(), deleteSessionHandler)
 
 export default router

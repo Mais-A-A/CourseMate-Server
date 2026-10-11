@@ -16,7 +16,7 @@ class DepartmentService {
   }
 
   async updateDepartment(deptId: string, deptData: Partial<DepartmentType>) {
-    return await Department.findByIdAndUpdate(deptId, deptData, { new: true })
+    return await Department.findByIdAndUpdate(deptId, deptData, { returnDocument: 'after' })
   }
 
   async deleteDepartment(deptId: string) {

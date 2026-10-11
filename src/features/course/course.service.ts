@@ -16,7 +16,7 @@ class CourseService {
   }
 
   async updateCourse(courseId: string, courseData: Partial<CourseType>) {
-    return await Course.findByIdAndUpdate(courseId, courseData, { new: true })
+    return await Course.findByIdAndUpdate(courseId, courseData, { returnDocument: 'after' })
   }
 
   async deleteCourse(courseId: string) {

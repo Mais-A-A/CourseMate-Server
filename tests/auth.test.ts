@@ -44,9 +44,33 @@ describe('Auth Routes', () => {
   it('should authenticate with Google and redirect to dashboard', async () => {
     const response = await request(app).get('/api/auth/google/callback')
     expect(response.status).toBe(302)
-    expect(response.headers.location).toBe(
-      `${process.env.CLIENT_URL}/dashboard`,
+    expect(response.headers.location).toMatch(
+      new RegExp(`^${process.env.CLIENT_URL}/dashboard#code=[a-f0-9]{64}$`),
     )
+    expect(response.headers.location).not.toContain('token=')
+  })
+
+  it('exchanges the one-time code for a JWT exactly once', async () => {
+    const cb = await request(app).get('/api/auth/google/callback')
+    const code = cb.headers.location!.split('#code=')[1]
+
+    const ok = await request(app).post('/api/auth/exchange').send({ code })
+    expect(ok.status).toBe(200)
+    expect(ok.body.token).toBeTruthy()
+    expect(ok.body.user.email).toBe('221141@ppu.edu.ps')
+
+    const again = await request(app).post('/api/auth/exchange').send({ code })
+    expect(again.status).toBe(400)
+  })
+
+  it('rejects malformed or unknown codes', async () => {
+    expect((await request(app).post('/api/auth/exchange').send({})).status).toBe(400)
+    expect(
+      (await request(app).post('/api/auth/exchange').send({ code: { $ne: null } })).status,
+    ).toBe(400)
+    expect(
+      (await request(app).post('/api/auth/exchange').send({ code: 'a'.repeat(64) })).status,
+    ).toBe(400)
   })
 
   it('should not return user info on /me endpoint without valid token', async () => {

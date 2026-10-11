@@ -24,6 +24,8 @@ const scheduleSchema = new Schema(
   },
 )
 
+scheduleSchema.index({ studentNo: 1, academicYear: 1, semesterNo: 1 })
+
 export const Schedule = model('Schedule', scheduleSchema)
 
 export default Schedule

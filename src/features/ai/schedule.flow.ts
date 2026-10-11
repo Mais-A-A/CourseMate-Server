@@ -7,6 +7,8 @@ import {
   getOrCreateSession,
   type PendingSchedule,
 } from './session.service.js'
+import { redactSecrets } from '../../shared/security/promptGuard.js'
+import { trackEvent } from '../events/event.service.js'
 import { AISchedule } from './aiSchedule.model.js'
 
 function extractScheduleParams(
@@ -34,6 +36,12 @@ function extractScheduleParams(
 async function savePendingSchedule(userId: string, schedule: GeneratedSchedule): Promise<void> {
   await AISchedule.deleteMany({ studentNo: userId, status: 'pending' })
   await AISchedule.create({ ...schedule, studentNo: userId, status: 'pending' })
+  trackEvent('schedule_generated', userId, {
+    source: 'chat',
+    sections: schedule.sections.length,
+    creditHours: schedule.totalCreditHours,
+    conflictsResolved: schedule.conflictsResolved ?? 0,
+  })
 }
 
 function formatScheduleResponse(schedule: GeneratedSchedule): string {
@@ -90,8 +98,9 @@ export async function* continuePendingScheduleStream(
       session.history.push(new HumanMessage(message), new AIMessage(formatted))
       yield formatted
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unknown error'
-      yield `عذراً، حدث خطأ في إنشاء الجدول: ${msg}`
+      console.error('[ScheduleFlow] generation failed:', error)
+      const msg = error instanceof Error ? redactSecrets(error.message).slice(0, 300) : ''
+      yield `عذراً، حدث خطأ في إنشاء الجدول${msg ? `: ${msg}` : ''}`
     }
     return
   }
@@ -141,8 +150,9 @@ export async function* continuePendingScheduleStream(
       session.history.push(new HumanMessage(message), new AIMessage(formatted))
       yield formatted
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unknown error'
-      yield `عذراً، حدث خطأ في إنشاء الجدول: ${msg}`
+      console.error('[ScheduleFlow] generation failed:', error)
+      const msg = error instanceof Error ? redactSecrets(error.message).slice(0, 300) : ''
+      yield `عذراً، حدث خطأ في إنشاء الجدول${msg ? `: ${msg}` : ''}`
     }
     return
   }

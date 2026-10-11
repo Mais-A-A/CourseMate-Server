@@ -20,7 +20,7 @@ class AcademicRuleService {
     ruleData: Partial<AcademicRuleType>,
   ) {
     return await AcademicRule.findByIdAndUpdate(ruleId, ruleData, {
-      new: true,
+      returnDocument: 'after',
     })
   }
 
