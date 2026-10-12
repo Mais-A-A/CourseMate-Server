@@ -19,6 +19,8 @@ const academicWarningSchema = new Schema(
   },
 )
 
+academicWarningSchema.index({ user_id: 1, is_resolved: 1 })
+
 export const AcademicWarning = model('AcademicWarning', academicWarningSchema)
 
 export default AcademicWarning

@@ -20,7 +20,7 @@ class AIRecomendationService {
     data: Partial<AIRecomendationType>,
   ) {
     return await AIRecomendationModel.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: 'after',
     })
   }
 

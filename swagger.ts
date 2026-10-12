@@ -42,13 +42,17 @@ const options = {
       { name: 'Academic Warnings', description: 'Academic warning management' },
       { name: 'Academic Rules', description: 'Academic rule management' },
       { name: 'AI', description: 'AI assistant endpoints' },
+      { name: 'Supervisor', description: 'Supervisor / admin student monitoring and risk' },
+      { name: 'Push', description: 'Web Push notification subscriptions' },
+      { name: 'Meetings', description: 'Student view of advising meetings' },
+      { name: 'Analytics', description: 'Usage and impact analytics (admin)' },
       {
         name: 'AI Recommendations',
         description: 'AI recommendation management',
       },
     ],
   },
-  apis: ['./src/routes/*.ts', './dist/src/routes/*.js'],
+  apis: ['./src/features/**/*.routes.ts', './dist/src/features/**/*.routes.js'],
 }
 
 export const swaggerSpec = swaggerJsdoc(options)

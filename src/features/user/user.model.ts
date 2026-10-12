@@ -74,6 +74,12 @@ const userSchema = new Schema(
       default: 'student',
     },
 
+    preferredLanguage: {
+      type: String,
+      enum: ['ar', 'en'],
+      default: 'ar',
+    },
+
     student_data: {
       type: studentDataSchema,
       required: function (this: any) {
@@ -98,6 +104,9 @@ const userSchema = new Schema(
     },
   },
 )
+
+userSchema.index({ 'student_data.supervisor.supervisorEmail': 1 })
+userSchema.index({ 'student_data.studentNo': 1 })
 
 export const User = model('User', userSchema)
 export default User

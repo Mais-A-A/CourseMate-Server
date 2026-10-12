@@ -1,3 +1,7 @@
+import {
+  ownerOfWarning,
+} from '../../shared/middlewares/ownership.js'
+import { userService } from '../user/user.service.js'
 import { academicWarningController } from './academicWarning.controller.js'
 import { Router } from 'express'
 import { academicWarningSchema } from './academicWarning.schema.js'
@@ -5,7 +9,7 @@ import { validateRequest } from '../../shared/middlewares/validation.js'
 import {
   requireAuth,
   requireRole,
-  requireAuthorizeUserOrHigher,
+  requireSelfOrStaff,
 } from '../../shared/middlewares/auth.middleware.js'
 const academicWarningRouter = Router()
 
@@ -69,6 +73,7 @@ const academicWarningRouter = Router()
 academicWarningRouter.get(
   '/',
   requireAuth(),
+  requireRole('admin'),
   academicWarningController.getAcademicWarnings,
 )
 
@@ -107,6 +112,7 @@ academicWarningRouter.get(
 academicWarningRouter.get(
   '/warningType/:warningType',
   requireAuth(),
+  requireRole('admin'),
   academicWarningController.getAcademicWarningsByWarningType,
 )
 
@@ -147,7 +153,7 @@ academicWarningRouter.get(
 academicWarningRouter.get(
   '/user/:userId',
   requireAuth(),
-  requireAuthorizeUserOrHigher,
+  requireSelfOrStaff((req) => userService.getEmailById(String(req.params.userId))),
   academicWarningController.getAcademicWarningsByUserId,
 )
 
@@ -184,6 +190,7 @@ academicWarningRouter.get(
 academicWarningRouter.get(
   '/:id',
   requireAuth(),
+  requireSelfOrStaff(ownerOfWarning),
   academicWarningController.getAcademicWarningById,
 )
 

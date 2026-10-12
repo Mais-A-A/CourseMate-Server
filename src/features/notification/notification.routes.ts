@@ -1,8 +1,12 @@
+import {
+  ownerOfUserParam,
+  ownerOfNotification,
+} from '../../shared/middlewares/ownership.js'
 import { notificationController } from './notification.controller.js'
 import { Router } from 'express'
 import { notificationSchema } from './notification.schemas.js'
 import { validateRequest } from '../../shared/middlewares/validation.js'
-import { requireAuth, requireRole } from '../../shared/middlewares/auth.middleware.js'
+import { requireAuth, requireRole, requireSelfOrStaff } from '../../shared/middlewares/auth.middleware.js'
 const notificationRouter = Router()
 
 /**
@@ -64,6 +68,7 @@ const notificationRouter = Router()
 notificationRouter.get(
   '/user/:userId',
   requireAuth(),
+  requireSelfOrStaff(ownerOfUserParam('userId')),
   notificationController.getNotificationsByUserId,
 )
 
@@ -96,7 +101,7 @@ notificationRouter.get(
 notificationRouter.put(
   '/user/:userId/read',
   requireAuth(),
-
+  requireSelfOrStaff(ownerOfUserParam('userId')),
   notificationController.markAllAsRead,
 )
 
@@ -133,6 +138,7 @@ notificationRouter.put(
 notificationRouter.get(
   '/:notificationId',
   requireAuth(),
+  requireSelfOrStaff(ownerOfNotification),
   notificationController.getNotificationById,
 )
 
@@ -169,6 +175,7 @@ notificationRouter.get(
 notificationRouter.post(
   '/',
   requireAuth(),
+  requireRole('admin'),
   validateRequest(notificationSchema),
   notificationController.createNotification,
 )
@@ -206,6 +213,7 @@ notificationRouter.post(
 notificationRouter.put(
   '/:notificationId/read',
   requireAuth(),
+  requireSelfOrStaff(ownerOfNotification),
   notificationController.markAsRead,
 )
 
@@ -238,7 +246,7 @@ notificationRouter.put(
 notificationRouter.delete(
   '/:notificationId',
   requireAuth(),
-
+  requireSelfOrStaff(ownerOfNotification),
   notificationController.deleteNotification,
 )
 

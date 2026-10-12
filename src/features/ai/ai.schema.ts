@@ -2,7 +2,11 @@ import { z } from 'zod'
 
 export const ChatSchema = z.object({
   message: z.string().min(1).max(1000),
-  sessionId: z.string().min(1),
+  sessionId: z.string().min(1).max(100),
+})
+
+export const RenameSessionSchema = z.object({
+  title: z.string().trim().min(1).max(100),
 })
 
 export const GenerateScheduleSchema = z.object({

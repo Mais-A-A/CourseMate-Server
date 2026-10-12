@@ -20,7 +20,7 @@ class ImportantDatesService {
     updateData: Partial<ImportantDateType>,
   ) {
     return await ImportantDate.findByIdAndUpdate(id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).lean()
   }

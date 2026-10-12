@@ -5,4 +5,5 @@ export const geminiModel = new ChatGoogleGenerativeAI({
   model: 'gemini-2.5-flash',
   apiKey: env.GEMINI_API_KEY,
   temperature: 0.2,
+  maxRetries: 2,
 })

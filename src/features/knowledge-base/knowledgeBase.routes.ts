@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import multer from 'multer'
+import { requireAuth, requireRole } from '../../shared/middlewares/auth.middleware.js'
 import {
   uploadDocument,
   getJobStatus,
@@ -8,7 +9,10 @@ import {
 } from './knowledgeBase.controller.js'
 
 const router = Router()
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+})
 
 /**
  * @swagger
@@ -35,7 +39,13 @@ const upload = multer({ storage: multer.memoryStorage() })
  *       500:
  *         description: Upload failed
  */
-router.post('/upload', upload.single('file'), uploadDocument)
+router.post(
+  '/upload',
+  requireAuth(),
+  requireRole('admin'),
+  upload.single('file'),
+  uploadDocument,
+)
 
 /**
  * @swagger
@@ -56,7 +66,7 @@ router.post('/upload', upload.single('file'), uploadDocument)
  *       404:
  *         description: Job not found
  */
-router.get('/jobs/:jobId', getJobStatus)
+router.get('/jobs/:jobId', requireAuth(), requireRole('admin'), getJobStatus)
 
 /**
  * @swagger
@@ -80,7 +90,7 @@ router.get('/jobs/:jobId', getJobStatus)
  *       200:
  *         description: List of successfully processed documents
  */
-router.get('/documents', listDocuments)
+router.get('/documents', requireAuth(), listDocuments)
 
 /**
  * @swagger
@@ -106,6 +116,6 @@ router.get('/documents', listDocuments)
  *       404:
  *         description: Document not found
  */
-router.get('/documents/:id/view', viewDocument)
+router.get('/documents/:id/view', requireAuth(), viewDocument)
 
 export default router

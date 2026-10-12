@@ -20,7 +20,7 @@ class AcademicPlanService {
     planData: Partial<AcademicPlanType>,
   ) {
     return await AcademicPlanModel.findByIdAndUpdate(planId, planData, {
-      new: true,
+      returnDocument: 'after',
     })
   }
 

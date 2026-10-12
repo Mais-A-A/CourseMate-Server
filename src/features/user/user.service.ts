@@ -76,6 +76,11 @@ class UserService {
     return await User.find().lean().select('-password')
   }
 
+  async getEmailById(id: string) {
+    const user = await User.findById(id).select('email').lean()
+    return user?.email ?? null
+  }
+
   async getUserByEmail(email: string) {
     const user = await User.findOne({ email }).select('-password').lean()
     return enrichWithCourseHistory(user)
@@ -107,7 +112,7 @@ class UserService {
     }
 
     return await User.findByIdAndUpdate(id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }).select('-password')
   }

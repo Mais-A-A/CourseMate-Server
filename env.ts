@@ -18,6 +18,10 @@ const envSchema = z.object({
   USE_REAL: z.string().optional(),
   GEMINI_API_KEY: z.string(),
   GEMINI_EMBEDDING_KEY: z.string(),
+  // Web Push (optional): generate with `npx web-push generate-vapid-keys`
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().optional(),
 })
 
 const parsedEnv = envSchema.parse(process.env)

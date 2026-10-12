@@ -53,5 +53,26 @@ analyticsRouter.get(
   analyticsController.getAnalytics,
 )
 
+/**
+ * @swagger
+ * /analytics/usage:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Usage and impact of the AI assistant (admin)
+ *     description: Aggregated from anonymous usage events (no message content). Cached for 5 minutes. `estimatedAdvisingHoursSaved` is an estimate based on `assumptions`.
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     parameters:
+ *       - { in: query, name: days, schema: { type: integer, default: 30, minimum: 1, maximum: 180 } }
+ *     responses:
+ *       200:
+ *         description: "data: { periodDays, chat{messages,answered,activeStudents,aiFailures,failureRate,byIntent,perDay[]}, schedules{generated,approved,approvalRate,conflictsResolved,averageSections}, security{promptInjectionsBlocked}, supervisor{riskInsightsGenerated}, estimatedAdvisingHoursSaved, assumptions }"
+ */
+analyticsRouter.get(
+  '/usage',
+  requireAuth(),
+  requireRole('admin'),
+  analyticsController.getUsage,
+)
+
 export { analyticsRouter }
 export default analyticsRouter
