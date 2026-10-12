@@ -14,10 +14,10 @@ const Body = z.object({ language: z.enum(['ar', 'en']) })
  * /user/me/language:
  *   get:
  *     summary: Get the logged-in user's saved language ("ar" or "en")
- *     tags: [User]
+ *     tags: [Users]
  *   put:
  *     summary: Save the logged-in user's language; used for notifications created in the background
- *     tags: [User]
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:

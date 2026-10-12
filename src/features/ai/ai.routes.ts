@@ -234,6 +234,40 @@ router.get('/schedule/approved', requireAuth(), getApprovedScheduleHandler)
  *         description: Unauthorized
  */
 router.get('/schedule/history', requireAuth(), getScheduleHistoryHandler)
+/**
+ * @swagger
+ * /ai/schedule/student/{studentNo}:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: Get the approved schedule of a student (the student, or their supervisor)
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: studentNo
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: acdYear
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: semesterNo
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Approved schedule (latest if no filters given)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: No approved schedule found for this student
+ */
 router.get('/schedule/student/:studentNo', requireAuth(), getStudentScheduleHandler)
 
 /**
