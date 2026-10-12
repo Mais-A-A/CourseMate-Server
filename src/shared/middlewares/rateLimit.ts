@@ -74,3 +74,17 @@ export const notifyLimiter = limiter({
   limit: 30,
   message: 'You are sending too many notifications. Please try again later.',
 })
+
+/** Push subscriptions, per user: 10 per hour. */
+export const pushSubscribeLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  message: 'Too many subscription attempts. Please try again later.',
+})
+
+/** "Send me a test notification", per user: 5 per hour. */
+export const pushTestLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  message: 'Too many test notifications. Please try again later.',
+})

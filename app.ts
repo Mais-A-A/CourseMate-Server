@@ -17,6 +17,7 @@ import { scheduleRouter } from './src/features/schedule/schedule.routes.js'
 import { importantDatesRouter } from './src/features/important-dates/importantDates.routes.js'
 import { analyticsRouter } from './src/features/analytics/analytics.routes.js'
 import { studentMeetingsRouter } from './src/features/supervisor/meetings.routes.js'
+import { pushRouter } from './src/features/push/push.routes.js'
 import { supervisorRouter } from './src/features/supervisor/supervisor.routes.js'
 import aiRoutes from './src/features/ai/ai.routes.js'
 import knowledgeBaseRouter from './src/features/knowledge-base/knowledgeBase.routes.js'
@@ -81,6 +82,7 @@ app.use('/course-section', courseSectionRouter)
 app.use('/department', departmentRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/analytics', analyticsRouter)
+app.use('/push', pushRouter)
 app.use('/supervisor', supervisorRouter)
 app.use('/meetings', studentMeetingsRouter)
 app.use('/knowledge-base', knowledgeBaseRouter)
