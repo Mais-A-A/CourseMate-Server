@@ -41,7 +41,7 @@ passport.use(
         }
         // The database is the source of truth; the email pattern is only the fallback for unknown users.
         const role = isBootstrapAdmin(email)
-          ? 'supervisor'
+          ? 'admin'
           : ((await roleFromDatabase(email)) ?? detectRole(email))
         const user: UniversityUser = {
           email,
