@@ -28,16 +28,21 @@ export async function uploadDocument(req: Request, res: Response) {
     if (req.file.mimetype !== 'application/pdf')
       return res.status(400).json({ message: 'Only PDF files are allowed' })
 
-    const job = await DocumentJob.create({ filename: req.file.originalname })
+    // Check real file content, not just the client-supplied mimetype
+    if (req.file.buffer.subarray(0, 5).toString('latin1') !== '%PDF-')
+      return res.status(400).json({ message: 'Invalid PDF file' })
+
+    const safeName = req.file.originalname.replace(/[^\p{L}\p{N}._ -]/gu, '_').slice(0, 150)
+    const job = await DocumentJob.create({ filename: safeName })
 
     setImmediate(() =>
-      processInBackground(String(job._id), req.file!.buffer, req.file!.originalname),
+      processInBackground(String(job._id), req.file!.buffer, safeName),
     )
 
     return res.status(202).json({
       message: 'Document received, processing in background',
       jobId: job._id,
-      filename: req.file.originalname,
+      filename: safeName,
     })
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
@@ -47,7 +52,7 @@ export async function uploadDocument(req: Request, res: Response) {
 
 export async function getJobStatus(req: Request, res: Response) {
   try {
-    const job = await DocumentJob.findById(req.params.jobId)
+    const job = await DocumentJob.findById(String(req.params.jobId))
     if (!job) return res.status(404).json({ message: 'Job not found' })
 
     return res.status(200).json({
@@ -66,14 +71,18 @@ export async function getJobStatus(req: Request, res: Response) {
 
 export async function viewDocument(req: Request, res: Response) {
   try {
-    const job = await DocumentJob.findById(req.params.id)
+    const job = await DocumentJob.findById(String(req.params.id))
       .select('fileBuffer filename')
       .lean()
     if (!job) return res.status(404).json({ message: 'Document not found' })
     if (!job.fileBuffer) return res.status(404).json({ message: 'File not available' })
 
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', `inline; filename="${job.filename}"`)
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(job.filename ?? 'document.pdf')}"`,
+    )
+    res.setHeader('X-Content-Type-Options', 'nosniff')
     return res.send(job.fileBuffer)
   } catch {
     return res.status(500).json({ message: 'Failed to retrieve document' })

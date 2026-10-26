@@ -52,3 +52,9 @@ Thumbs.db
 # Testing
 # =========================
 .jest/
+
+# Stray compiled output next to sources
+src/**/*.js
+
+# Local backups written by src/scripts/assignTestStudents.ts
+supervisor-backup-*.json

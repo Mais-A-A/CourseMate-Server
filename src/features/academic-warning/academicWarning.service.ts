@@ -25,7 +25,7 @@ class AcademicWarningService {
     warningData: Partial<AcademicWarningType>,
   ) {
     return await AcademicWarning.findByIdAndUpdate(warningId, warningData, {
-      new: true,
+      returnDocument: 'after',
     })
   }
 
@@ -39,7 +39,7 @@ class AcademicWarningService {
     return await AcademicWarning.findByIdAndUpdate(
       warningId,
       { is_resolved: true, resolved_at: new Date() },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     )
   }
 

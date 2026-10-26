@@ -56,7 +56,7 @@ const aiRecomendationRouter = Router()
 aiRecomendationRouter.get(
   '/',
   requireAuth(),
-  requireRole('admin', 'supervisor'),
+  requireRole('admin'),
   aiRecomendationController.getAIRecomendations,
 )
 
@@ -93,7 +93,7 @@ aiRecomendationRouter.get(
 aiRecomendationRouter.get(
   '/:id',
   requireAuth(),
-  requireRole('admin', 'supervisor'),
+  requireRole('admin'),
   aiRecomendationController.getAIRecomendationById,
 )
 
@@ -128,6 +128,7 @@ aiRecomendationRouter.get(
 aiRecomendationRouter.post(
   '/',
   requireAuth(),
+  requireRole('admin'),
   validateRequest(AIRecomendationSchema),
   aiRecomendationController.createAIRecomendation,
 )
